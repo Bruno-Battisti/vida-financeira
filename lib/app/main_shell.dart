@@ -1,51 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
-import '../features/dashboard/screens/dashboard_screen.dart';
-import '../features/goals/screens/goals_screen.dart';
-import '../features/reports/screens/reports_screen.dart';
-import '../features/settings/screens/settings_screen.dart';
-import '../features/transactions/screens/transactions_screen.dart';
+class MainShell extends StatelessWidget {
+  const MainShell({super.key, required this.navigationShell});
 
-class MainShell extends StatefulWidget {
-  const MainShell({super.key});
-
-  @override
-  State<MainShell> createState() => _MainShellState();
-}
-
-class _MainShellState extends State<MainShell> {
-  int _selectedIndex = 0;
+  final StatefulNavigationShell navigationShell;
 
   static const _titles = ['Início', 'Transações', 'Metas', 'Relatórios'];
-
-  static const _screens = [
-    DashboardScreen(),
-    TransactionsScreen(),
-    GoalsScreen(),
-    ReportsScreen(),
-  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(_titles[_selectedIndex]),
+        title: Text(_titles[navigationShell.currentIndex]),
         actions: [
           IconButton(
             icon: const Icon(Icons.settings_outlined),
             tooltip: 'Configurações',
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const SettingsScreen()),
-              );
-            },
+            onPressed: () => context.push('/settings'),
           ),
         ],
       ),
-      body: IndexedStack(index: _selectedIndex, children: _screens),
+      body: navigationShell,
       bottomNavigationBar: NavigationBar(
-        selectedIndex: _selectedIndex,
-        onDestinationSelected: (index) => setState(() => _selectedIndex = index),
+        selectedIndex: navigationShell.currentIndex,
+        onDestinationSelected: (index) => navigationShell.goBranch(
+          index,
+          initialLocation: index == navigationShell.currentIndex,
+        ),
         destinations: const [
           NavigationDestination(
             icon: Icon(Icons.home_outlined),

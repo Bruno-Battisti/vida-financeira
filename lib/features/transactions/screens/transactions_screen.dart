@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/mock/mock_data.dart';
 import '../../../core/utils/formatters.dart';
@@ -73,6 +74,16 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                               fontWeight: FontWeight.bold,
                             ),
                           ),
+                          onTap: () async {
+                            final revisada = await context.push<bool>(
+                              '/transactions/${transaction.id}',
+                            );
+                            if (revisada == true && context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Transação marcada como revisada.')),
+                              );
+                            }
+                          },
                         ),
                       );
                     },

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'main_shell.dart';
+import 'routes.dart';
 import 'theme.dart';
 
 class VidaFinanceiraApp extends StatelessWidget {
@@ -8,11 +8,11 @@ class VidaFinanceiraApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'Vida Financeira',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
-      home: const MainShell(),
+      routerConfig: appRouter,
     );
   }
 }
