@@ -49,3 +49,12 @@ app.*.map.json
 
 # Claude Code local settings
 .claude/
+
+# Real secrets (never commit): admin/service-account credentials, .env files.
+# Client-side Firebase config (google-services.json, firebase_options.dart,
+# GoogleService-Info.plist) is NOT secret and stays tracked on purpose.
+*serviceAccount*.json
+*-firebase-adminsdk-*.json
+.env
+.env.*
+firebase-debug.log
