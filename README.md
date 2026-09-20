@@ -1,6 +1,6 @@
 # vida_financeira
 
-Vida Financeira - app de controle financeiro pessoal, projeto de aprendizado Flutter/Dart
+Vida Financeira - app de controle financeiro pessoal
 
 ## Getting Started
 
