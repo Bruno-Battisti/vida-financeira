@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../features/dashboard/screens/dashboard_screen.dart';
 import '../features/goals/screens/goal_detail_screen.dart';
+import '../features/goals/screens/goal_form_screen.dart';
 import '../features/goals/screens/goals_screen.dart';
 import '../features/reports/screens/reports_screen.dart';
 import '../features/settings/screens/settings_screen.dart';
@@ -60,12 +61,27 @@ GoRouter createRouter() => GoRouter(
               builder: (context, state) => const GoalsScreen(),
               routes: [
                 GoRoute(
+                  path: 'new',
+                  parentNavigatorKey: rootNavigatorKey,
+                  builder: (context, state) => const GoalFormScreen(),
+                ),
+                GoRoute(
                   path: ':id',
                   parentNavigatorKey: rootNavigatorKey,
                   builder: (context, state) {
                     final id = int.parse(state.pathParameters['id']!);
                     return GoalDetailScreen(goalId: id);
                   },
+                  routes: [
+                    GoRoute(
+                      path: 'edit',
+                      parentNavigatorKey: rootNavigatorKey,
+                      builder: (context, state) {
+                        final id = int.parse(state.pathParameters['id']!);
+                        return GoalFormScreen(goalId: id);
+                      },
+                    ),
+                  ],
                 ),
               ],
             ),

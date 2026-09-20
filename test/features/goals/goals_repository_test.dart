@@ -15,45 +15,71 @@ void main() {
 
   tearDown(() => db.close());
 
-  test('watchAll() começa com as metas fictícias', () async {
-    final goals = await repository.watchAll().first;
+  test('watchAllWithProgress() começa com as metas fictícias', () async {
+    final goals = await repository.watchAllWithProgress().first;
     expect(goals, isNotEmpty);
   });
 
-  test('add() insere uma nova meta', () async {
-    final before = await repository.watchAll().first;
+  test('currentAmount é a soma dos aportes/retiradas da meta', () async {
+    final goals = await repository.watchAllWithProgress().first;
+    final notebook = goals.firstWhere((g) => g.goal.name == 'Notebook novo');
 
-    await repository.add(name: 'Teste', targetAmount: 100, currentAmount: 0);
-
-    final after = await repository.watchAll().first;
-    expect(after.length, before.length + 1);
+    // seed: um único aporte de 4500, meta de 4500 -> 100% completa
+    expect(notebook.currentAmount, 4500);
+    expect(notebook.progress, 1);
   });
 
-  test('update() altera os campos de uma meta existente', () async {
-    final original = (await repository.watchAll().first).first;
+  test('addContribution() soma ao currentAmount e addContribution negativo retira', () async {
+    final before = (await repository.watchAllWithProgress().first).first;
 
-    await repository.update(original.copyWith(name: 'Renomeada'));
+    await repository.addContribution(goalId: before.goal.id, amount: 100);
+    final afterAporte = (await repository.watchAllWithProgress().first).firstWhere((g) => g.goal.id == before.goal.id);
+    expect(afterAporte.currentAmount, before.currentAmount + 100);
 
-    final updated = (await repository.watchAll().first).firstWhere((g) => g.id == original.id);
-    expect(updated.name, 'Renomeada');
+    await repository.addContribution(goalId: before.goal.id, amount: -50);
+    final afterRetirada = (await repository.watchAllWithProgress().first).firstWhere((g) => g.goal.id == before.goal.id);
+    expect(afterRetirada.currentAmount, before.currentAmount + 50);
   });
 
-  test('remove() apaga a meta da lista', () async {
-    final target = (await repository.watchAll().first).first;
+  test('watchEntries() lista o histórico de uma meta, mais recente primeiro', () async {
+    final goal = (await repository.watchAllWithProgress().first).first;
 
-    await repository.remove(target.id);
+    await repository.addContribution(goalId: goal.goal.id, amount: 10, date: DateTime(2026, 1, 1));
+    await repository.addContribution(goalId: goal.goal.id, amount: 20, date: DateTime(2026, 6, 1));
 
-    final after = await repository.watchAll().first;
-    expect(after.any((g) => g.id == target.id), isFalse);
+    final entries = await repository.watchEntries(goal.goal.id).first;
+    expect(entries.length, greaterThanOrEqualTo(2));
+    expect(entries.first.date.isAfter(entries.last.date), isTrue);
   });
 
-  test('progress fica limitado entre 0 e 1', () async {
-    await repository.remove((await repository.watchAll().first).first.id);
-    await repository.add(name: 'Meta cheia', targetAmount: 100, currentAmount: 250);
-    await repository.add(name: 'Meta negativa', targetAmount: 100, currentAmount: -10);
+  test('addGoal() cria uma meta nova com currentAmount zero', () async {
+    await repository.addGoal(name: 'Meta nova', targetAmount: 1000);
 
-    final goals = await repository.watchAll().first;
-    expect(goals.firstWhere((g) => g.name == 'Meta cheia').progress, 1);
-    expect(goals.firstWhere((g) => g.name == 'Meta negativa').progress, 0);
+    final goals = await repository.watchAllWithProgress().first;
+    final created = goals.firstWhere((g) => g.goal.name == 'Meta nova');
+    expect(created.currentAmount, 0);
+    expect(created.progress, 0);
+  });
+
+  test('updateGoal() altera nome e valor objetivo', () async {
+    final original = (await repository.watchAllWithProgress().first).first;
+
+    await repository.updateGoal(original.goal.copyWith(name: 'Renomeada', targetAmount: 999));
+
+    final updated = (await repository.watchAllWithProgress().first).firstWhere((g) => g.goal.id == original.goal.id);
+    expect(updated.goal.name, 'Renomeada');
+    expect(updated.goal.targetAmount, 999);
+  });
+
+  test('removeGoal() apaga a meta e seu histórico de aportes', () async {
+    final target = (await repository.watchAllWithProgress().first).first;
+
+    await repository.removeGoal(target.goal.id);
+
+    final goals = await repository.watchAllWithProgress().first;
+    expect(goals.any((g) => g.goal.id == target.goal.id), isFalse);
+
+    final entries = await repository.watchEntries(target.goal.id).first;
+    expect(entries, isEmpty);
   });
 }

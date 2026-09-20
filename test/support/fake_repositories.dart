@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:vida_financeira/core/constants/category_icons.dart';
 import 'package:vida_financeira/features/goals/models/goal.dart';
+import 'package:vida_financeira/features/goals/models/goal_progress.dart';
+import 'package:vida_financeira/features/goals/models/goal_transaction.dart';
 import 'package:vida_financeira/features/goals/repositories/goals_repository.dart';
 import 'package:vida_financeira/features/transactions/models/category.dart';
 import 'package:vida_financeira/features/transactions/models/transaction.dart';
@@ -98,44 +100,83 @@ class FakeTransactionsRepository implements TransactionsRepository {
 }
 
 class FakeGoalsRepository implements GoalsRepository {
-  final List<Goal> _items = [
-    const Goal(id: 1, name: 'Viagem para o Nordeste', targetAmount: 5000, currentAmount: 1800),
-    const Goal(id: 2, name: 'Reserva de emergência', targetAmount: 10000, currentAmount: 6200),
-    const Goal(id: 3, name: 'Notebook novo', targetAmount: 4500, currentAmount: 4500),
+  final List<Goal> _goals = [
+    const Goal(id: 1, name: 'Viagem para o Nordeste', targetAmount: 5000),
+    const Goal(id: 2, name: 'Reserva de emergência', targetAmount: 10000),
+    const Goal(id: 3, name: 'Notebook novo', targetAmount: 4500),
   ];
 
-  final _controller = StreamController<List<Goal>>.broadcast();
-  int _nextId = 4;
+  final List<GoalTransaction> _entries = [
+    GoalTransaction(id: 1, goalId: 1, amount: 1800, date: DateTime(2026, 8, 1)),
+    GoalTransaction(id: 2, goalId: 2, amount: 6200, date: DateTime(2026, 8, 1)),
+    GoalTransaction(id: 3, goalId: 3, amount: 4500, date: DateTime(2026, 8, 1)),
+  ];
 
-  @override
-  Stream<List<Goal>> watchAll() async* {
-    yield List.unmodifiable(_items);
-    yield* _controller.stream;
+  final _changesController = StreamController<void>.broadcast();
+  int _nextGoalId = 4;
+  int _nextEntryId = 4;
+
+  void _notifyChanged() => _changesController.add(null);
+
+  double _currentAmount(int goalId) {
+    return _entries.where((e) => e.goalId == goalId).fold(0.0, (sum, e) => sum + e.amount);
   }
 
-  void _emit() => _controller.add(List.unmodifiable(_items));
+  @override
+  Stream<List<GoalProgress>> watchAllWithProgress() async* {
+    Iterable<GoalProgress> build() => _goals.map((goal) {
+          final currentAmount = _currentAmount(goal.id);
+          return (
+            goal: goal,
+            currentAmount: currentAmount,
+            progress: computeGoalProgress(currentAmount, goal.targetAmount),
+          );
+        });
+
+    yield build().toList();
+    yield* _changesController.stream.map((_) => build().toList());
+  }
 
   @override
-  Future<void> add({
+  Stream<List<GoalTransaction>> watchEntries(int goalId) async* {
+    List<GoalTransaction> forGoal() =>
+        _entries.where((e) => e.goalId == goalId).toList()..sort((a, b) => b.date.compareTo(a.date));
+
+    yield forGoal();
+    yield* _changesController.stream.map((_) => forGoal());
+  }
+
+  @override
+  Future<void> addGoal({
     required String name,
     required double targetAmount,
-    required double currentAmount,
     DateTime? deadline,
   }) async {
-    _items.add(Goal(id: _nextId++, name: name, targetAmount: targetAmount, currentAmount: currentAmount, deadline: deadline));
-    _emit();
+    _goals.add(Goal(id: _nextGoalId++, name: name, targetAmount: targetAmount, deadline: deadline));
+    _notifyChanged();
   }
 
   @override
-  Future<void> update(Goal goal) async {
-    final index = _items.indexWhere((g) => g.id == goal.id);
-    if (index != -1) _items[index] = goal;
-    _emit();
+  Future<void> updateGoal(Goal goal) async {
+    final index = _goals.indexWhere((g) => g.id == goal.id);
+    if (index != -1) _goals[index] = goal;
+    _notifyChanged();
   }
 
   @override
-  Future<void> remove(int id) async {
-    _items.removeWhere((g) => g.id == id);
-    _emit();
+  Future<void> removeGoal(int id) async {
+    _goals.removeWhere((g) => g.id == id);
+    _entries.removeWhere((e) => e.goalId == id);
+    _notifyChanged();
+  }
+
+  @override
+  Future<void> addContribution({
+    required int goalId,
+    required double amount,
+    DateTime? date,
+  }) async {
+    _entries.add(GoalTransaction(id: _nextEntryId++, goalId: goalId, amount: amount, date: date ?? DateTime.now()));
+    _notifyChanged();
   }
 }

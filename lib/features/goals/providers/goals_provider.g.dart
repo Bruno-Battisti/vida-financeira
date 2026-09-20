@@ -57,11 +57,13 @@ final goalsProvider = GoalsProvider._();
 final class GoalsProvider
     extends
         $FunctionalProvider<
-          AsyncValue<List<Goal>>,
-          List<Goal>,
-          Stream<List<Goal>>
+          AsyncValue<List<GoalProgress>>,
+          List<GoalProgress>,
+          Stream<List<GoalProgress>>
         >
-    with $FutureModifier<List<Goal>>, $StreamProvider<List<Goal>> {
+    with
+        $FutureModifier<List<GoalProgress>>,
+        $StreamProvider<List<GoalProgress>> {
   GoalsProvider._()
     : super(
         from: null,
@@ -78,23 +80,29 @@ final class GoalsProvider
 
   @$internal
   @override
-  $StreamProviderElement<List<Goal>> $createElement($ProviderPointer pointer) =>
-      $StreamProviderElement(pointer);
+  $StreamProviderElement<List<GoalProgress>> $createElement(
+    $ProviderPointer pointer,
+  ) => $StreamProviderElement(pointer);
 
   @override
-  Stream<List<Goal>> create(Ref ref) {
+  Stream<List<GoalProgress>> create(Ref ref) {
     return goals(ref);
   }
 }
 
-String _$goalsHash() => r'0de6803cf30c9a65e1fa7e034f59eeafae53a514';
+String _$goalsHash() => r'0b7ab87110548bbf1e15fb87be0bccd49932753c';
 
 @ProviderFor(goalById)
 final goalByIdProvider = GoalByIdFamily._();
 
 final class GoalByIdProvider
-    extends $FunctionalProvider<AsyncValue<Goal>, Goal, FutureOr<Goal>>
-    with $FutureModifier<Goal>, $FutureProvider<Goal> {
+    extends
+        $FunctionalProvider<
+          AsyncValue<GoalProgress>,
+          GoalProgress,
+          FutureOr<GoalProgress>
+        >
+    with $FutureModifier<GoalProgress>, $FutureProvider<GoalProgress> {
   GoalByIdProvider._({
     required GoalByIdFamily super.from,
     required int super.argument,
@@ -118,11 +126,12 @@ final class GoalByIdProvider
 
   @$internal
   @override
-  $FutureProviderElement<Goal> $createElement($ProviderPointer pointer) =>
-      $FutureProviderElement(pointer);
+  $FutureProviderElement<GoalProgress> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
 
   @override
-  FutureOr<Goal> create(Ref ref) {
+  FutureOr<GoalProgress> create(Ref ref) {
     final argument = this.argument as int;
     return goalById(ref, argument);
   }
@@ -138,10 +147,10 @@ final class GoalByIdProvider
   }
 }
 
-String _$goalByIdHash() => r'45d132432abbb61592baf622869950bea7cf18e6';
+String _$goalByIdHash() => r'e796d822227ce60b860bd756a0b2d2050591423d';
 
 final class GoalByIdFamily extends $Family
-    with $FunctionalFamilyOverride<FutureOr<Goal>, int> {
+    with $FunctionalFamilyOverride<FutureOr<GoalProgress>, int> {
   GoalByIdFamily._()
     : super(
         retry: null,
@@ -155,4 +164,81 @@ final class GoalByIdFamily extends $Family
 
   @override
   String toString() => r'goalByIdProvider';
+}
+
+@ProviderFor(goalEntries)
+final goalEntriesProvider = GoalEntriesFamily._();
+
+final class GoalEntriesProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<GoalTransaction>>,
+          List<GoalTransaction>,
+          Stream<List<GoalTransaction>>
+        >
+    with
+        $FutureModifier<List<GoalTransaction>>,
+        $StreamProvider<List<GoalTransaction>> {
+  GoalEntriesProvider._({
+    required GoalEntriesFamily super.from,
+    required int super.argument,
+  }) : super(
+         retry: null,
+         name: r'goalEntriesProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$goalEntriesHash();
+
+  @override
+  String toString() {
+    return r'goalEntriesProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $StreamProviderElement<List<GoalTransaction>> $createElement(
+    $ProviderPointer pointer,
+  ) => $StreamProviderElement(pointer);
+
+  @override
+  Stream<List<GoalTransaction>> create(Ref ref) {
+    final argument = this.argument as int;
+    return goalEntries(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is GoalEntriesProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$goalEntriesHash() => r'c3c6e8db619a60a2c73bf64500b74f1f8ce7933a';
+
+final class GoalEntriesFamily extends $Family
+    with $FunctionalFamilyOverride<Stream<List<GoalTransaction>>, int> {
+  GoalEntriesFamily._()
+    : super(
+        retry: null,
+        name: r'goalEntriesProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  GoalEntriesProvider call(int goalId) =>
+      GoalEntriesProvider._(argument: goalId, from: this);
+
+  @override
+  String toString() => r'goalEntriesProvider';
 }

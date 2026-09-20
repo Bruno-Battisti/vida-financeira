@@ -1,7 +1,8 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../database/providers.dart';
-import '../models/goal.dart';
+import '../models/goal_progress.dart';
+import '../models/goal_transaction.dart';
 import '../repositories/goals_repository.dart';
 
 part 'goals_provider.g.dart';
@@ -12,12 +13,17 @@ GoalsRepository goalsRepository(Ref ref) {
 }
 
 @riverpod
-Stream<List<Goal>> goals(Ref ref) {
-  return ref.watch(goalsRepositoryProvider).watchAll();
+Stream<List<GoalProgress>> goals(Ref ref) {
+  return ref.watch(goalsRepositoryProvider).watchAllWithProgress();
 }
 
 @riverpod
-Future<Goal> goalById(Ref ref, int id) async {
+Future<GoalProgress> goalById(Ref ref, int id) async {
   final goals = await ref.watch(goalsProvider.future);
-  return goals.firstWhere((g) => g.id == id);
+  return goals.firstWhere((g) => g.goal.id == id);
+}
+
+@riverpod
+Stream<List<GoalTransaction>> goalEntries(Ref ref, int goalId) {
+  return ref.watch(goalsRepositoryProvider).watchEntries(goalId);
 }

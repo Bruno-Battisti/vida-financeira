@@ -2,19 +2,20 @@ import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 
 import 'tables/categories_table.dart';
+import 'tables/goal_entries_table.dart';
 import 'tables/goals_table.dart';
 import 'tables/transaction_entries_table.dart';
 
 part 'database.g.dart';
 
-@DriftDatabase(tables: [Categories, TransactionEntries, Goals])
+@DriftDatabase(tables: [Categories, TransactionEntries, Goals, GoalEntries])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   AppDatabase.forTesting(super.connection);
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration {
@@ -25,7 +26,23 @@ class AppDatabase extends _$AppDatabase {
           batch.insertAll(categories, _seedCategories);
           batch.insertAll(transactionEntries, _seedTransactions);
           batch.insertAll(goals, _seedGoals);
+          batch.insertAll(goalEntries, _seedGoalEntries);
         });
+      },
+      onUpgrade: (Migrator m, int from, int to) async {
+        if (from < 2) {
+          // Na v1 "goals" guardava currentAmount direto na coluna; na v2 esse
+          // valor passa a ser derivado da soma de GoalEntries (nunca dessincroniza).
+          // App ainda em desenvolvimento, sem dados reais de usuário a preservar,
+          // então a tabela é recriada do zero em vez de migrada coluna a coluna.
+          await m.deleteTable('goals');
+          await m.createTable(goals);
+          await m.createTable(goalEntries);
+          await batch((batch) {
+            batch.insertAll(goals, _seedGoals);
+            batch.insertAll(goalEntries, _seedGoalEntries);
+          });
+        }
       },
     );
   }
@@ -129,18 +146,22 @@ final _seedGoals = [
   GoalsCompanion.insert(
     name: 'Viagem para o Nordeste',
     targetAmount: 5000,
-    currentAmount: 1800,
     deadline: Value(DateTime(2027, 1, 15)),
   ),
   GoalsCompanion.insert(
     name: 'Reserva de emergência',
     targetAmount: 10000,
-    currentAmount: 6200,
   ),
   GoalsCompanion.insert(
     name: 'Notebook novo',
     targetAmount: 4500,
-    currentAmount: 4500,
     deadline: Value(DateTime(2026, 10, 1)),
   ),
+];
+
+// goalId segue a ordem de inserção acima (1 = Viagem, 2 = Reserva, 3 = Notebook).
+final _seedGoalEntries = [
+  GoalEntriesCompanion.insert(goalId: 1, amount: 1800, date: DateTime(2026, 8, 1)),
+  GoalEntriesCompanion.insert(goalId: 2, amount: 6200, date: DateTime(2026, 8, 1)),
+  GoalEntriesCompanion.insert(goalId: 3, amount: 4500, date: DateTime(2026, 8, 1)),
 ];

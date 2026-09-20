@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Goal {
 
- int get id; String get name; double get targetAmount; double get currentAmount; DateTime? get deadline;
+ int get id; String get name; double get targetAmount; DateTime? get deadline;
 /// Create a copy of Goal
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -27,20 +27,20 @@ $GoalCopyWith<Goal> get copyWith => _$GoalCopyWithImpl<Goal>(this as Goal, _$ide
 @override
 bool operator ==(Object other) {
   final _this = this as Goal;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Goal&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.targetAmount, _this.targetAmount) || other.targetAmount == _this.targetAmount)&&(identical(other.currentAmount, _this.currentAmount) || other.currentAmount == _this.currentAmount)&&(identical(other.deadline, _this.deadline) || other.deadline == _this.deadline));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Goal&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.targetAmount, _this.targetAmount) || other.targetAmount == _this.targetAmount)&&(identical(other.deadline, _this.deadline) || other.deadline == _this.deadline));
 }
 
 
 @override
 int get hashCode {
   final _this = this as Goal;
-  return Object.hash(runtimeType,_this.id,_this.name,_this.targetAmount,_this.currentAmount,_this.deadline);
+  return Object.hash(runtimeType,_this.id,_this.name,_this.targetAmount,_this.deadline);
 }
 
 @override
 String toString() {
   final _this = this as Goal;
-  return 'Goal(id: ${_this.id}, name: ${_this.name}, targetAmount: ${_this.targetAmount}, currentAmount: ${_this.currentAmount}, deadline: ${_this.deadline})';
+  return 'Goal(id: ${_this.id}, name: ${_this.name}, targetAmount: ${_this.targetAmount}, deadline: ${_this.deadline})';
 }
 
 
@@ -51,7 +51,7 @@ abstract mixin class $GoalCopyWith<$Res>  {
   factory $GoalCopyWith(Goal value, $Res Function(Goal) _then) = _$GoalCopyWithImpl;
 @useResult
 $Res call({
- int id, String name, double targetAmount, double currentAmount, DateTime? deadline
+ int id, String name, double targetAmount, DateTime? deadline
 });
 
 
@@ -68,12 +68,11 @@ class _$GoalCopyWithImpl<$Res>
 
 /// Create a copy of Goal
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? targetAmount = null,Object? currentAmount = null,Object? deadline = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? targetAmount = null,Object? deadline = freezed,}) {
   return _then(Goal(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,targetAmount: null == targetAmount ? _self.targetAmount : targetAmount // ignore: cast_nullable_to_non_nullable
-as double,currentAmount: null == currentAmount ? _self.currentAmount : currentAmount // ignore: cast_nullable_to_non_nullable
 as double,deadline: freezed == deadline ? _self.deadline : deadline // ignore: cast_nullable_to_non_nullable
 as DateTime?,
   ));
@@ -160,10 +159,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String name,  double targetAmount,  double currentAmount,  DateTime? deadline)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String name,  double targetAmount,  DateTime? deadline)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Goal() when $default != null:
-return $default(_that.id,_that.name,_that.targetAmount,_that.currentAmount,_that.deadline);case _:
+return $default(_that.id,_that.name,_that.targetAmount,_that.deadline);case _:
   return orElse();
 
 }
@@ -181,10 +180,10 @@ return $default(_that.id,_that.name,_that.targetAmount,_that.currentAmount,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String name,  double targetAmount,  double currentAmount,  DateTime? deadline)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String name,  double targetAmount,  DateTime? deadline)  $default,) {final _that = this;
 switch (_that) {
 case _Goal():
-return $default(_that.id,_that.name,_that.targetAmount,_that.currentAmount,_that.deadline);case _:
+return $default(_that.id,_that.name,_that.targetAmount,_that.deadline);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -201,10 +200,10 @@ return $default(_that.id,_that.name,_that.targetAmount,_that.currentAmount,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String name,  double targetAmount,  double currentAmount,  DateTime? deadline)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String name,  double targetAmount,  DateTime? deadline)?  $default,) {final _that = this;
 switch (_that) {
 case _Goal() when $default != null:
-return $default(_that.id,_that.name,_that.targetAmount,_that.currentAmount,_that.deadline);case _:
+return $default(_that.id,_that.name,_that.targetAmount,_that.deadline);case _:
   return null;
 
 }
@@ -215,14 +214,13 @@ return $default(_that.id,_that.name,_that.targetAmount,_that.currentAmount,_that
 /// @nodoc
 
 
-class _Goal extends Goal {
-  const _Goal({required this.id, required this.name, required this.targetAmount, required this.currentAmount, this.deadline}): super._();
+class _Goal implements Goal {
+  const _Goal({required this.id, required this.name, required this.targetAmount, this.deadline});
   
 
 @override final  int id;
 @override final  String name;
 @override final  double targetAmount;
-@override final  double currentAmount;
 @override final  DateTime? deadline;
 
 /// Create a copy of Goal
@@ -235,18 +233,18 @@ _$GoalCopyWith<_Goal> get copyWith => __$GoalCopyWithImpl<_Goal>(this, _$identit
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Goal&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.targetAmount, targetAmount) || other.targetAmount == targetAmount)&&(identical(other.currentAmount, currentAmount) || other.currentAmount == currentAmount)&&(identical(other.deadline, deadline) || other.deadline == deadline));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Goal&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.targetAmount, targetAmount) || other.targetAmount == targetAmount)&&(identical(other.deadline, deadline) || other.deadline == deadline));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,name,targetAmount,currentAmount,deadline);
+    return Object.hash(runtimeType,id,name,targetAmount,deadline);
 }
 
 @override
 String toString() {
-    return 'Goal(id: $id, name: $name, targetAmount: $targetAmount, currentAmount: $currentAmount, deadline: $deadline)';
+    return 'Goal(id: $id, name: $name, targetAmount: $targetAmount, deadline: $deadline)';
 }
 
 
@@ -257,7 +255,7 @@ abstract mixin class _$GoalCopyWith<$Res> implements $GoalCopyWith<$Res> {
   factory _$GoalCopyWith(_Goal value, $Res Function(_Goal) _then) = __$GoalCopyWithImpl;
 @override @useResult
 $Res call({
- int id, String name, double targetAmount, double currentAmount, DateTime? deadline
+ int id, String name, double targetAmount, DateTime? deadline
 });
 
 
@@ -274,12 +272,11 @@ class __$GoalCopyWithImpl<$Res>
 
 /// Create a copy of Goal
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? targetAmount = null,Object? currentAmount = null,Object? deadline = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? targetAmount = null,Object? deadline = freezed,}) {
   return _then(_Goal(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,targetAmount: null == targetAmount ? _self.targetAmount : targetAmount // ignore: cast_nullable_to_non_nullable
-as double,currentAmount: null == currentAmount ? _self.currentAmount : currentAmount // ignore: cast_nullable_to_non_nullable
 as double,deadline: freezed == deadline ? _self.deadline : deadline // ignore: cast_nullable_to_non_nullable
 as DateTime?,
   ));

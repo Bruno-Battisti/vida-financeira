@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/utils/formatters.dart';
-import '../models/goal.dart';
+import '../models/goal_progress.dart';
 import '../providers/goals_provider.dart';
 
 class GoalsScreen extends ConsumerWidget {
@@ -13,32 +13,40 @@ class GoalsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final goalsAsync = ref.watch(goalsProvider);
 
-    return goalsAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => Center(child: Text('Erro: $error')),
-      data: (goals) {
-        if (goals.isEmpty) {
-          return const Center(child: Text('Nenhuma meta cadastrada.'));
-        }
+    return Scaffold(
+      body: goalsAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, _) => Center(child: Text('Erro: $error')),
+        data: (goals) {
+          if (goals.isEmpty) {
+            return const Center(child: Text('Nenhuma meta cadastrada.'));
+          }
 
-        return ListView.builder(
-          padding: const EdgeInsets.all(16),
-          itemCount: goals.length,
-          itemBuilder: (context, index) => _GoalCard(goal: goals[index]),
-        );
-      },
+          return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: goals.length,
+            itemBuilder: (context, index) => _GoalCard(item: goals[index]),
+          );
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => context.push('/goals/new'),
+        tooltip: 'Nova meta',
+        child: const Icon(Icons.add),
+      ),
     );
   }
 }
 
 class _GoalCard extends StatelessWidget {
-  const _GoalCard({required this.goal});
+  const _GoalCard({required this.item});
 
-  final Goal goal;
+  final GoalProgress item;
 
   @override
   Widget build(BuildContext context) {
-    final percentText = '${(goal.progress * 100).toStringAsFixed(0)}%';
+    final goal = item.goal;
+    final percentText = '${(item.progress * 100).toStringAsFixed(0)}%';
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -64,7 +72,7 @@ class _GoalCard extends StatelessWidget {
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: LinearProgressIndicator(
-                  value: goal.progress,
+                  value: item.progress,
                   minHeight: 8,
                 ),
               ),
@@ -72,7 +80,7 @@ class _GoalCard extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('${formatCurrency(goal.currentAmount)} de ${formatCurrency(goal.targetAmount)}'),
+                  Text('${formatCurrency(item.currentAmount)} de ${formatCurrency(goal.targetAmount)}'),
                   if (goal.deadline != null)
                     Text(
                       'até ${formatDate(goal.deadline!)}',
