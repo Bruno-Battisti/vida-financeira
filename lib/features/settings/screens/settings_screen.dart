@@ -1,8 +1,14 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../../app/theme_mode_provider.dart';
 import '../../../core/providers/firebase_providers.dart';
+import '../../transactions/providers/categories_provider.dart';
+import '../../transactions/providers/transactions_provider.dart';
+import '../../transactions/services/transaction_csv_exporter.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -54,8 +60,8 @@ class SettingsScreen extends ConsumerWidget {
           ListTile(
             leading: const Icon(Icons.upload_outlined),
             title: const Text('Exportar dados'),
-            subtitle: const Text('Disponível na Fase 12'),
-            onTap: () => _showComingSoon(context),
+            subtitle: const Text('Baixa suas transações em um arquivo CSV'),
+            onTap: () => _exportData(context, ref),
           ),
           ListTile(
             leading: const Icon(Icons.download_outlined),
@@ -111,6 +117,39 @@ class SettingsScreen extends ConsumerWidget {
 
     if (selected != null) {
       await ref.read(themeModeProvider.notifier).setThemeMode(selected);
+    }
+  }
+
+  Future<void> _exportData(BuildContext context, WidgetRef ref) async {
+    try {
+      final transactions = await ref.read(transactionsProvider.future);
+      final categories = await ref.read(categoriesProvider.future);
+      final categoryMap = {for (final c in categories) c.id: c};
+
+      if (transactions.isEmpty) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Nenhuma transação para exportar ainda.')),
+          );
+        }
+        return;
+      }
+
+      final csv = TransactionCsvExporter.build(transactions, categoryMap);
+      final bytes = utf8.encode(csv);
+
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile.fromData(bytes, name: 'transacoes.csv', mimeType: 'text/csv')],
+          subject: 'Transações — Vida Financeira',
+        ),
+      );
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Não foi possível exportar: $e')),
+        );
+      }
     }
   }
 
