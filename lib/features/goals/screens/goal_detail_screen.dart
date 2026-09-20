@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/mock/mock_data.dart';
 import '../../../core/utils/formatters.dart';
+import '../providers/goals_provider.dart';
 
-class GoalDetailScreen extends StatelessWidget {
+class GoalDetailScreen extends ConsumerWidget {
   const GoalDetailScreen({super.key, required this.goalId});
 
   final int goalId;
 
   @override
-  Widget build(BuildContext context) {
-    final goal = MockData.goals.firstWhere((g) => g.id == goalId);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final goal = ref.watch(goalByIdProvider(goalId));
     final percentText = '${(goal.progress * 100).toStringAsFixed(0)}%';
 
     return Scaffold(

@@ -1,21 +1,18 @@
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+part 'transaction.freezed.dart';
+
 enum TransactionType { income, expense }
 
-class Transaction {
-  const Transaction({
-    required this.id,
-    required this.description,
-    required this.amount,
-    required this.type,
-    required this.categoryId,
-    required this.date,
-    this.note,
-  });
-
-  final int id;
-  final String description;
-  final double amount;
-  final TransactionType type;
-  final int categoryId;
-  final DateTime date;
-  final String? note;
+@freezed
+abstract class Transaction with _$Transaction {
+  const factory Transaction({
+    required int id,
+    required String description,
+    required double amount,
+    required TransactionType type,
+    required int categoryId,
+    required DateTime date,
+    String? note,
+  }) = _Transaction;
 }

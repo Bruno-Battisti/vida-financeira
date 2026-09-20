@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/mock/mock_data.dart';
 import '../../../core/utils/formatters.dart';
 import '../models/transaction.dart';
+import '../providers/transactions_provider.dart';
 
-class TransactionDetailScreen extends StatelessWidget {
+class TransactionDetailScreen extends ConsumerWidget {
   const TransactionDetailScreen({super.key, required this.transactionId});
 
   final int transactionId;
 
   @override
-  Widget build(BuildContext context) {
-    final transaction = MockData.transactions.firstWhere((t) => t.id == transactionId);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final transaction = ref.watch(transactionByIdProvider(transactionId));
     final category = MockData.categoryById(transaction.categoryId);
     final isIncome = transaction.type == TransactionType.income;
 

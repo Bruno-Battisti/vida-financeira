@@ -1,24 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/mock/mock_data.dart';
 import '../../../core/utils/formatters.dart';
 import '../models/transaction.dart';
+import '../providers/transactions_provider.dart';
 
 enum _TransactionFilter { all, income, expense }
 
-class TransactionsScreen extends StatefulWidget {
+class TransactionsScreen extends ConsumerStatefulWidget {
   const TransactionsScreen({super.key});
 
   @override
-  State<TransactionsScreen> createState() => _TransactionsScreenState();
+  ConsumerState<TransactionsScreen> createState() => _TransactionsScreenState();
 }
 
-class _TransactionsScreenState extends State<TransactionsScreen> {
+class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
   _TransactionFilter _filter = _TransactionFilter.all;
 
-  List<Transaction> get _filteredTransactions {
-    final transactions = MockData.transactions;
+  List<Transaction> _applyFilter(List<Transaction> transactions) {
     switch (_filter) {
       case _TransactionFilter.all:
         return transactions;
@@ -31,7 +32,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final transactions = _filteredTransactions;
+    final transactions = _applyFilter(ref.watch(transactionsProvider));
 
     return Scaffold(
       body: Column(
@@ -95,7 +96,6 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
         onPressed: () async {
           final created = await context.push<bool>('/transactions/new');
           if (created == true && context.mounted) {
-            setState(() {});
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Transação criada com sucesso!')),
             );

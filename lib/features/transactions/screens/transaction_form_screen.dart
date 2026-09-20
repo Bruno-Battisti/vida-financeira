@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/mock/mock_data.dart';
 import '../../../core/utils/formatters.dart';
 import '../models/category.dart';
 import '../models/transaction.dart';
+import '../providers/categories_provider.dart';
+import '../providers/transactions_provider.dart';
 
-class TransactionFormScreen extends StatefulWidget {
+class TransactionFormScreen extends ConsumerStatefulWidget {
   const TransactionFormScreen({super.key});
 
   @override
-  State<TransactionFormScreen> createState() => _TransactionFormScreenState();
+  ConsumerState<TransactionFormScreen> createState() => _TransactionFormScreenState();
 }
 
-class _TransactionFormScreenState extends State<TransactionFormScreen> {
+class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final _descriptionController = TextEditingController();
   final _amountController = TextEditingController();
@@ -31,11 +33,6 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
     super.dispose();
   }
 
-  List<Category> get _categoriesForType {
-    final categoryType = _type == TransactionType.income ? CategoryType.income : CategoryType.expense;
-    return MockData.categories.where((c) => c.type == categoryType).toList();
-  }
-
   Future<void> _pickDate() async {
     final picked = await showDatePicker(
       context: context,
@@ -48,15 +45,15 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
     }
   }
 
-  void _submit() {
+  void _submit(List<Transaction> currentTransactions) {
     if (!_formKey.currentState!.validate()) {
       return;
     }
 
     final amount = double.parse(_amountController.text.trim().replaceAll(',', '.'));
-    final nextId = MockData.transactions.isEmpty
+    final nextId = currentTransactions.isEmpty
         ? 1
-        : MockData.transactions.map((t) => t.id).reduce((a, b) => a > b ? a : b) + 1;
+        : currentTransactions.map((t) => t.id).reduce((a, b) => a > b ? a : b) + 1;
     final note = _noteController.text.trim();
 
     final transaction = Transaction(
@@ -69,15 +66,18 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
       note: note.isEmpty ? null : note,
     );
 
-    MockData.transactions
-      ..add(transaction)
-      ..sort((a, b) => b.date.compareTo(a.date));
+    ref.read(transactionsProvider.notifier).add(transaction);
 
     context.pop(true);
   }
 
   @override
   Widget build(BuildContext context) {
+    final allCategories = ref.watch(categoriesProvider);
+    final categoryType = _type == TransactionType.income ? CategoryType.income : CategoryType.expense;
+    final categoriesForType = allCategories.where((c) => c.type == categoryType).toList();
+    final currentTransactions = ref.watch(transactionsProvider);
+
     return Scaffold(
       appBar: AppBar(title: const Text('Nova transação')),
       body: Form(
@@ -141,7 +141,7 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
             DropdownButtonFormField<Category>(
               initialValue: _category,
               decoration: const InputDecoration(labelText: 'Categoria'),
-              items: _categoriesForType
+              items: categoriesForType
                   .map((category) => DropdownMenuItem(value: category, child: Text(category.name)))
                   .toList(),
               onChanged: (value) => setState(() => _category = value),
@@ -163,7 +163,7 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
             ),
             const SizedBox(height: 24),
             FilledButton(
-              onPressed: _submit,
+              onPressed: () => _submit(currentTransactions),
               child: const Padding(
                 padding: EdgeInsets.symmetric(vertical: 12),
                 child: Text('Salvar'),

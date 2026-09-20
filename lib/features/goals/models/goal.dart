@@ -1,17 +1,18 @@
-class Goal {
-  const Goal({
-    required this.id,
-    required this.name,
-    required this.targetAmount,
-    required this.currentAmount,
-    this.deadline,
-  });
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-  final int id;
-  final String name;
-  final double targetAmount;
-  final double currentAmount;
-  final DateTime? deadline;
+part 'goal.freezed.dart';
+
+@freezed
+abstract class Goal with _$Goal {
+  const Goal._();
+
+  const factory Goal({
+    required int id,
+    required String name,
+    required double targetAmount,
+    required double currentAmount,
+    DateTime? deadline,
+  }) = _Goal;
 
   double get progress {
     if (targetAmount <= 0) return 0;

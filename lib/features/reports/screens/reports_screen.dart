@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/mock/mock_data.dart';
 import '../../../core/utils/formatters.dart';
 import '../../transactions/models/transaction.dart';
+import '../../transactions/providers/transactions_provider.dart';
 
-class ReportsScreen extends StatelessWidget {
+class ReportsScreen extends ConsumerWidget {
   const ReportsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final transactions = MockData.transactions;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final transactions = ref.watch(transactionsProvider);
     final totalIncome = transactions
         .where((t) => t.type == TransactionType.income)
         .fold(0.0, (sum, t) => sum + t.amount);

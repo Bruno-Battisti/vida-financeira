@@ -1,29 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/mock/mock_data.dart';
 import '../../../core/utils/formatters.dart';
 import '../../transactions/models/transaction.dart';
+import '../providers/dashboard_providers.dart';
 
-class DashboardScreen extends StatelessWidget {
+class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final transactions = MockData.transactions;
-    final now = DateTime.now();
-
-    final totalIncome = _sumByType(transactions, TransactionType.income);
-    final totalExpense = _sumByType(transactions, TransactionType.expense);
-    final saldo = totalIncome - totalExpense;
-
-    final monthTransactions = transactions
-        .where((t) => t.date.year == now.year && t.date.month == now.month)
-        .toList();
-    final monthIncome = _sumByType(monthTransactions, TransactionType.income);
-    final monthExpense = _sumByType(monthTransactions, TransactionType.expense);
-
-    final categoryTotals = _expenseTotalsByCategory(monthTransactions);
-    final recentTransactions = transactions.take(5).toList();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final saldo = ref.watch(saldoDisponivelProvider);
+    final monthIncome = ref.watch(receitasDoMesProvider);
+    final monthExpense = ref.watch(despesasDoMesProvider);
+    final categoryTotals = ref.watch(gastosPorCategoriaDoMesProvider);
+    final recentTransactions = ref.watch(ultimasTransacoesProvider);
 
     return ListView(
       padding: const EdgeInsets.all(16),
@@ -75,49 +67,34 @@ class DashboardScreen extends StatelessWidget {
         const SizedBox(height: 24),
         Text('Últimas transações', style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),
-        Card(
-          child: Column(
-            children: recentTransactions.map((transaction) {
-              final category = MockData.categoryById(transaction.categoryId);
-              final isIncome = transaction.type == TransactionType.income;
-              return ListTile(
-                leading: Icon(category.icon),
-                title: Text(transaction.description),
-                subtitle: Text('${category.name} · ${formatDate(transaction.date)}'),
-                trailing: Text(
-                  '${isIncome ? '+' : '-'} ${formatCurrency(transaction.amount)}',
-                  style: TextStyle(
-                    color: isIncome ? Colors.green : Colors.red,
-                    fontWeight: FontWeight.bold,
+        if (recentTransactions.isEmpty)
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 8),
+            child: Text('Nenhuma transação cadastrada ainda.'),
+          )
+        else
+          Card(
+            child: Column(
+              children: recentTransactions.map((transaction) {
+                final category = MockData.categoryById(transaction.categoryId);
+                final isIncome = transaction.type == TransactionType.income;
+                return ListTile(
+                  leading: Icon(category.icon),
+                  title: Text(transaction.description),
+                  subtitle: Text('${category.name} · ${formatDate(transaction.date)}'),
+                  trailing: Text(
+                    '${isIncome ? '+' : '-'} ${formatCurrency(transaction.amount)}',
+                    style: TextStyle(
+                      color: isIncome ? Colors.green : Colors.red,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-              );
-            }).toList(),
+                );
+              }).toList(),
+            ),
           ),
-        ),
       ],
     );
-  }
-
-  double _sumByType(List<Transaction> transactions, TransactionType type) {
-    return transactions
-        .where((t) => t.type == type)
-        .fold(0.0, (sum, t) => sum + t.amount);
-  }
-
-  Map<int, double> _expenseTotalsByCategory(List<Transaction> transactions) {
-    final totals = <int, double>{};
-    for (final transaction in transactions) {
-      if (transaction.type != TransactionType.expense) continue;
-      totals.update(
-        transaction.categoryId,
-        (value) => value + transaction.amount,
-        ifAbsent: () => transaction.amount,
-      );
-    }
-    final entries = totals.entries.toList()
-      ..sort((a, b) => b.value.compareTo(a.value));
-    return Map.fromEntries(entries);
   }
 }
 

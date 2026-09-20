@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/mock/mock_data.dart';
 import '../../../core/utils/formatters.dart';
 import '../models/goal.dart';
+import '../providers/goals_provider.dart';
 
-class GoalsScreen extends StatelessWidget {
+class GoalsScreen extends ConsumerWidget {
   const GoalsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final goals = MockData.goals;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final goals = ref.watch(goalsProvider);
 
     if (goals.isEmpty) {
       return const Center(child: Text('Nenhuma meta cadastrada.'));

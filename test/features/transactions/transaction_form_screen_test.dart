@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:vida_financeira/app/app.dart';
@@ -6,7 +7,7 @@ import 'package:vida_financeira/features/transactions/models/category.dart';
 
 void main() {
   testWidgets('Formulário de nova transação não salva com campos vazios', (WidgetTester tester) async {
-    await tester.pumpWidget(const VidaFinanceiraApp());
+    await tester.pumpWidget(const ProviderScope(child: VidaFinanceiraApp()));
 
     await tester.tap(find.text('Transações').last);
     await tester.pumpAndSettle();
@@ -26,7 +27,7 @@ void main() {
   });
 
   testWidgets('Preencher o formulário corretamente cria a transação e volta para a lista', (WidgetTester tester) async {
-    await tester.pumpWidget(const VidaFinanceiraApp());
+    await tester.pumpWidget(const ProviderScope(child: VidaFinanceiraApp()));
 
     await tester.tap(find.text('Transações').last);
     await tester.pumpAndSettle();
