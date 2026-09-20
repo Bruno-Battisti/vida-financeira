@@ -16,7 +16,10 @@ class ExchangeRateCard extends ConsumerWidget {
         child: rateAsync.when(
           loading: () => const Row(
             children: [
-              SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)),
+              SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2)),
               SizedBox(width: 12),
               Text('Buscando cotação do dólar...'),
             ],
@@ -48,19 +51,32 @@ class ExchangeRateCard extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Dólar hoje', style: Theme.of(context).textTheme.bodySmall),
+                      Text(
+                        'Dólar hoje',
+                        style: Theme.of(context).textTheme.bodySmall,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                       Text(
                         'R\$ ${rate.bid.toStringAsFixed(2)}',
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 18),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
                 ),
-                Text(
-                  '${isUp ? '+' : ''}${rate.pctChange.toStringAsFixed(2)}%',
-                  style: TextStyle(
-                    color: isUp ? Colors.green : Colors.red,
-                    fontWeight: FontWeight.bold,
+                const SizedBox(width: 8),
+                // `Flexible` evita que o percentual force overflow em telas
+                // estreitas — em vez de vazar, o texto trunca com "...".
+                Flexible(
+                  child: Text(
+                    '${isUp ? '+' : ''}${rate.pctChange.toStringAsFixed(2)}%',
+                    style: TextStyle(
+                      color: isUp ? Colors.green : Colors.red,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
                   ),
                 ),
                 IconButton(

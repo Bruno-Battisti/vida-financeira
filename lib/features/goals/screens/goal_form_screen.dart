@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/utils/formatters.dart';
+import '../../../core/widgets/responsive_center.dart';
 import '../models/goal.dart';
 import '../providers/goals_provider.dart';
 
@@ -35,7 +36,8 @@ class _GoalFormScreenState extends ConsumerState<GoalFormScreen> {
         if (!mounted) return;
         setState(() {
           _nameController.text = item.goal.name;
-          _targetController.text = item.goal.targetAmount.toStringAsFixed(2).replaceAll('.', ',');
+          _targetController.text =
+              item.goal.targetAmount.toStringAsFixed(2).replaceAll('.', ',');
           _deadline = item.goal.deadline;
           _loadingInitial = false;
         });
@@ -66,7 +68,8 @@ class _GoalFormScreenState extends ConsumerState<GoalFormScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _saving = true);
-    final targetAmount = double.parse(_targetController.text.trim().replaceAll(',', '.'));
+    final targetAmount =
+        double.parse(_targetController.text.trim().replaceAll(',', '.'));
     final repository = ref.read(goalsRepositoryProvider);
 
     try {
@@ -103,70 +106,79 @@ class _GoalFormScreenState extends ConsumerState<GoalFormScreen> {
       appBar: AppBar(title: Text(_isEditing ? 'Editar meta' : 'Nova meta')),
       body: _loadingInitial
           ? const Center(child: CircularProgressIndicator())
-          : Form(
-              key: _formKey,
-              child: ListView(
-                padding: const EdgeInsets.all(16),
-                children: [
-                  TextFormField(
-                    controller: _nameController,
-                    decoration: const InputDecoration(labelText: 'Nome da meta'),
-                    textInputAction: TextInputAction.next,
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Informe um nome.';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _targetController,
-                    decoration: const InputDecoration(labelText: 'Valor objetivo', prefixText: 'R\$ '),
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Informe o valor objetivo.';
-                      }
-                      final parsed = double.tryParse(value.trim().replaceAll(',', '.'));
-                      if (parsed == null) {
-                        return 'Valor inválido.';
-                      }
-                      if (parsed <= 0) {
-                        return 'O valor deve ser maior que zero.';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: const Text('Prazo (opcional)'),
-                    subtitle: Text(_deadline == null ? 'Sem prazo definido' : formatDate(_deadline!)),
-                    trailing: _deadline == null
-                        ? const Icon(Icons.calendar_today_outlined)
-                        : IconButton(
-                            icon: const Icon(Icons.clear),
-                            tooltip: 'Remover prazo',
-                            onPressed: () => setState(() => _deadline = null),
-                          ),
-                    onTap: _pickDeadline,
-                  ),
-                  const SizedBox(height: 24),
-                  FilledButton(
-                    onPressed: _saving ? null : _submit,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      child: _saving
-                          ? const SizedBox(
-                              height: 18,
-                              width: 18,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Text('Salvar'),
+          : ResponsiveCenter(
+              child: Form(
+                key: _formKey,
+                child: ListView(
+                  padding: const EdgeInsets.all(16),
+                  children: [
+                    TextFormField(
+                      controller: _nameController,
+                      decoration:
+                          const InputDecoration(labelText: 'Nome da meta'),
+                      textInputAction: TextInputAction.next,
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Informe um nome.';
+                        }
+                        return null;
+                      },
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _targetController,
+                      decoration: const InputDecoration(
+                          labelText: 'Valor objetivo', prefixText: 'R\$ '),
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Informe o valor objetivo.';
+                        }
+                        final parsed =
+                            double.tryParse(value.trim().replaceAll(',', '.'));
+                        if (parsed == null) {
+                          return 'Valor inválido.';
+                        }
+                        if (parsed <= 0) {
+                          return 'O valor deve ser maior que zero.';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('Prazo (opcional)'),
+                      subtitle: Text(_deadline == null
+                          ? 'Sem prazo definido'
+                          : formatDate(_deadline!)),
+                      trailing: _deadline == null
+                          ? const Icon(Icons.calendar_today_outlined)
+                          : IconButton(
+                              icon: const Icon(Icons.clear),
+                              tooltip: 'Remover prazo',
+                              onPressed: () => setState(() => _deadline = null),
+                            ),
+                      onTap: _pickDeadline,
+                    ),
+                    const SizedBox(height: 24),
+                    FilledButton(
+                      onPressed: _saving ? null : _submit,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        child: _saving
+                            ? const SizedBox(
+                                height: 18,
+                                width: 18,
+                                child:
+                                    CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : const Text('Salvar'),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
     );

@@ -6,6 +6,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../../app/theme_mode_provider.dart';
 import '../../../core/providers/firebase_providers.dart';
+import '../../../core/widgets/responsive_center.dart';
 import '../../transactions/providers/categories_provider.dart';
 import '../../transactions/providers/transactions_provider.dart';
 import '../../transactions/services/transaction_csv_exporter.dart';
@@ -20,63 +21,66 @@ class SettingsScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Configurações')),
-      body: ListView(
-        children: [
-          const _SectionLabel('Conta'),
-          ListTile(
-            leading: const Icon(Icons.account_circle_outlined),
-            title: Text(user?.email ?? 'Não autenticado'),
-            subtitle: const Text('Seus dados ficam sincronizados nesta conta'),
-          ),
-          ListTile(
-            leading: const Icon(Icons.logout),
-            title: const Text('Sair'),
-            onTap: () => ref.read(firebaseAuthProvider).signOut(),
-          ),
-          const Divider(),
-          const _SectionLabel('Aparência'),
-          ListTile(
-            leading: const Icon(Icons.dark_mode_outlined),
-            title: const Text('Tema'),
-            subtitle: Text(_themeModeLabel(themeMode)),
-            onTap: () => _showThemeDialog(context, ref, themeMode),
-          ),
-          const Divider(),
-          const _SectionLabel('Preferências'),
-          ListTile(
-            leading: const Icon(Icons.attach_money),
-            title: const Text('Moeda'),
-            subtitle: const Text('Real (R\$)'),
-            onTap: () => _showComingSoon(context),
-          ),
-          ListTile(
-            leading: const Icon(Icons.notifications_outlined),
-            title: const Text('Notificações'),
-            subtitle: const Text('Disponível na Fase 12'),
-            onTap: () => _showComingSoon(context),
-          ),
-          const Divider(),
-          const _SectionLabel('Dados'),
-          ListTile(
-            leading: const Icon(Icons.upload_outlined),
-            title: const Text('Exportar dados'),
-            subtitle: const Text('Baixa suas transações em um arquivo CSV'),
-            onTap: () => _exportData(context, ref),
-          ),
-          ListTile(
-            leading: const Icon(Icons.download_outlined),
-            title: const Text('Importar dados'),
-            subtitle: const Text('Disponível na Fase 12'),
-            onTap: () => _showComingSoon(context),
-          ),
-          const Divider(),
-          const _SectionLabel('Sobre'),
-          ListTile(
-            leading: const Icon(Icons.info_outline),
-            title: const Text('Sobre o Vida Financeira'),
-            onTap: () => _showAbout(context),
-          ),
-        ],
+      body: ResponsiveCenter(
+        child: ListView(
+          children: [
+            const _SectionLabel('Conta'),
+            ListTile(
+              leading: const Icon(Icons.account_circle_outlined),
+              title: Text(user?.email ?? 'Não autenticado'),
+              subtitle:
+                  const Text('Seus dados ficam sincronizados nesta conta'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.logout),
+              title: const Text('Sair'),
+              onTap: () => ref.read(firebaseAuthProvider).signOut(),
+            ),
+            const Divider(),
+            const _SectionLabel('Aparência'),
+            ListTile(
+              leading: const Icon(Icons.dark_mode_outlined),
+              title: const Text('Tema'),
+              subtitle: Text(_themeModeLabel(themeMode)),
+              onTap: () => _showThemeDialog(context, ref, themeMode),
+            ),
+            const Divider(),
+            const _SectionLabel('Preferências'),
+            ListTile(
+              leading: const Icon(Icons.attach_money),
+              title: const Text('Moeda'),
+              subtitle: const Text('Real (R\$)'),
+              onTap: () => _showComingSoon(context),
+            ),
+            ListTile(
+              leading: const Icon(Icons.notifications_outlined),
+              title: const Text('Notificações'),
+              subtitle: const Text('Disponível na Fase 12'),
+              onTap: () => _showComingSoon(context),
+            ),
+            const Divider(),
+            const _SectionLabel('Dados'),
+            ListTile(
+              leading: const Icon(Icons.upload_outlined),
+              title: const Text('Exportar dados'),
+              subtitle: const Text('Baixa suas transações em um arquivo CSV'),
+              onTap: () => _exportData(context, ref),
+            ),
+            ListTile(
+              leading: const Icon(Icons.download_outlined),
+              title: const Text('Importar dados'),
+              subtitle: const Text('Disponível na Fase 12'),
+              onTap: () => _showComingSoon(context),
+            ),
+            const Divider(),
+            const _SectionLabel('Sobre'),
+            ListTile(
+              leading: const Icon(Icons.info_outline),
+              title: const Text('Sobre o Vida Financeira'),
+              onTap: () => _showAbout(context),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -92,7 +96,8 @@ class SettingsScreen extends ConsumerWidget {
     }
   }
 
-  Future<void> _showThemeDialog(BuildContext context, WidgetRef ref, ThemeMode current) async {
+  Future<void> _showThemeDialog(
+      BuildContext context, WidgetRef ref, ThemeMode current) async {
     final selected = await showDialog<ThemeMode>(
       context: context,
       builder: (context) => SimpleDialog(
@@ -129,7 +134,8 @@ class SettingsScreen extends ConsumerWidget {
       if (transactions.isEmpty) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Nenhuma transação para exportar ainda.')),
+            const SnackBar(
+                content: Text('Nenhuma transação para exportar ainda.')),
           );
         }
         return;
@@ -140,7 +146,9 @@ class SettingsScreen extends ConsumerWidget {
 
       await SharePlus.instance.share(
         ShareParams(
-          files: [XFile.fromData(bytes, name: 'transacoes.csv', mimeType: 'text/csv')],
+          files: [
+            XFile.fromData(bytes, name: 'transacoes.csv', mimeType: 'text/csv')
+          ],
           subject: 'Transações — Vida Financeira',
         ),
       );
@@ -155,7 +163,8 @@ class SettingsScreen extends ConsumerWidget {
 
   void _showComingSoon(BuildContext context) {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Disponível em uma fase futura do projeto.')),
+      const SnackBar(
+          content: Text('Disponível em uma fase futura do projeto.')),
     );
   }
 
