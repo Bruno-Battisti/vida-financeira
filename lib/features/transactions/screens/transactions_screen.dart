@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/mock/mock_data.dart';
 import '../../../core/utils/formatters.dart';
+import '../models/category.dart';
 import '../models/transaction.dart';
+import '../providers/categories_provider.dart';
 import '../providers/transactions_provider.dart';
 
 enum _TransactionFilter { all, income, expense }
@@ -32,7 +33,20 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final transactions = _applyFilter(ref.watch(transactionsProvider));
+    final transactionsAsync = ref.watch(transactionsProvider);
+    final categoriesAsync = ref.watch(categoriesProvider);
+
+    Widget body;
+    if (transactionsAsync.isLoading || categoriesAsync.isLoading) {
+      body = const Center(child: CircularProgressIndicator());
+    } else if (transactionsAsync.hasError) {
+      body = Center(child: Text('Erro: ${transactionsAsync.error}'));
+    } else if (categoriesAsync.hasError) {
+      body = Center(child: Text('Erro: ${categoriesAsync.error}'));
+    } else {
+      final categoryMap = {for (final c in categoriesAsync.requireValue) c.id: c};
+      body = _buildList(context, _applyFilter(transactionsAsync.requireValue), categoryMap);
+    }
 
     return Scaffold(
       body: Column(
@@ -51,45 +65,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
               },
             ),
           ),
-          Expanded(
-            child: transactions.isEmpty
-                ? const Center(child: Text('Nenhuma transação encontrada.'))
-                : ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    itemCount: transactions.length,
-                    itemBuilder: (context, index) {
-                      final transaction = transactions[index];
-                      final category = MockData.categoryById(transaction.categoryId);
-                      final isIncome = transaction.type == TransactionType.income;
-
-                      return Card(
-                        margin: const EdgeInsets.only(bottom: 8),
-                        child: ListTile(
-                          leading: CircleAvatar(child: Icon(category.icon)),
-                          title: Text(transaction.description),
-                          subtitle: Text('${category.name} · ${formatDate(transaction.date)}'),
-                          trailing: Text(
-                            '${isIncome ? '+' : '-'} ${formatCurrency(transaction.amount)}',
-                            style: TextStyle(
-                              color: isIncome ? Colors.green : Colors.red,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          onTap: () async {
-                            final revisada = await context.push<bool>(
-                              '/transactions/${transaction.id}',
-                            );
-                            if (revisada == true && context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Transação marcada como revisada.')),
-                              );
-                            }
-                          },
-                        ),
-                      );
-                    },
-                  ),
-          ),
+          Expanded(child: body),
         ],
       ),
       floatingActionButton: FloatingActionButton(
@@ -104,6 +80,50 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
         tooltip: 'Nova transação',
         child: const Icon(Icons.add),
       ),
+    );
+  }
+
+  Widget _buildList(
+    BuildContext context,
+    List<Transaction> transactions,
+    Map<int, Category> categoryMap,
+  ) {
+    if (transactions.isEmpty) {
+      return const Center(child: Text('Nenhuma transação encontrada.'));
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      itemCount: transactions.length,
+      itemBuilder: (context, index) {
+        final transaction = transactions[index];
+        final category = categoryMap[transaction.categoryId];
+        final isIncome = transaction.type == TransactionType.income;
+
+        return Card(
+          margin: const EdgeInsets.only(bottom: 8),
+          child: ListTile(
+            leading: CircleAvatar(child: Icon(category?.icon ?? Icons.category)),
+            title: Text(transaction.description),
+            subtitle: Text('${category?.name ?? 'Categoria'} · ${formatDate(transaction.date)}'),
+            trailing: Text(
+              '${isIncome ? '+' : '-'} ${formatCurrency(transaction.amount)}',
+              style: TextStyle(
+                color: isIncome ? Colors.green : Colors.red,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            onTap: () async {
+              final revisada = await context.push<bool>('/transactions/${transaction.id}');
+              if (revisada == true && context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Transação marcada como revisada.')),
+                );
+              }
+            },
+          ),
+        );
+      },
     );
   }
 }

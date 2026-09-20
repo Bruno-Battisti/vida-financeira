@@ -1,75 +1,89 @@
+import 'package:drift/native.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:vida_financeira/database/database.dart';
+import 'package:vida_financeira/database/providers.dart';
 import 'package:vida_financeira/features/dashboard/providers/dashboard_providers.dart';
 import 'package:vida_financeira/features/transactions/models/transaction.dart';
 import 'package:vida_financeira/features/transactions/providers/transactions_provider.dart';
 
-class _FakeTransactionsNotifier extends TransactionsNotifier {
-  _FakeTransactionsNotifier(this._seed);
+ProviderContainer _containerWithEmptyDb() {
+  final db = AppDatabase.forTesting(NativeDatabase.memory());
+  final container = ProviderContainer(
+    overrides: [appDatabaseProvider.overrideWithValue(db)],
+  );
+  // Mantém os providers autoDispose vivos durante o teste, como uma tela real faria.
+  container.listen(transactionsProvider, (_, _) {});
+  container.listen(dashboardSummaryProvider, (_, _) {});
+  addTearDown(container.dispose);
+  addTearDown(db.close);
+  return container;
+}
 
-  final List<Transaction> _seed;
-
-  @override
-  List<Transaction> build() => _seed;
+Future<void> _clearSeedTransactions(ProviderContainer container) async {
+  final repository = container.read(transactionsRepositoryProvider);
+  final existentes = await container.read(transactionsProvider.future);
+  for (final t in existentes) {
+    await repository.remove(t.id);
+  }
 }
 
 void main() {
-  test('saldoDisponivelProvider soma receitas e subtrai despesas', () {
+  test('dashboardSummaryProvider soma receitas e subtrai despesas do mês atual', () async {
+    final container = _containerWithEmptyDb();
+    await _clearSeedTransactions(container);
+
+    final repository = container.read(transactionsRepositoryProvider);
     final now = DateTime.now();
-    final fixed = [
-      Transaction(
-        id: 1,
-        description: 'Salário',
-        amount: 1000,
-        type: TransactionType.income,
-        categoryId: 10,
-        date: now,
-      ),
-      Transaction(
-        id: 2,
-        description: 'Aluguel',
-        amount: 400,
-        type: TransactionType.expense,
-        categoryId: 3,
-        date: now,
-      ),
-    ];
-
-    final container = ProviderContainer(
-      overrides: [
-        transactionsProvider.overrideWith(() => _FakeTransactionsNotifier(fixed)),
-      ],
+    await repository.add(
+      description: 'Salário',
+      amount: 1000,
+      type: TransactionType.income,
+      categoryId: 10,
+      date: now,
     );
-    addTearDown(container.dispose);
+    await repository.add(
+      description: 'Aluguel',
+      amount: 400,
+      type: TransactionType.expense,
+      categoryId: 3,
+      date: now,
+    );
 
-    expect(container.read(saldoDisponivelProvider), 600);
-    expect(container.read(receitasDoMesProvider), 1000);
-    expect(container.read(despesasDoMesProvider), 400);
+    final summary = await container.read(dashboardSummaryProvider.future);
+
+    expect(summary.saldo, 600);
+    expect(summary.receitasDoMes, 1000);
+    expect(summary.despesasDoMes, 400);
   });
 
-  test('saldoDisponivelProvider reage a mudanças no transactionsProvider', () {
+  test('dashboardSummaryProvider ignora transações de meses anteriores nos totais do mês', () async {
+    final container = _containerWithEmptyDb();
+    await _clearSeedTransactions(container);
+
+    final repository = container.read(transactionsRepositoryProvider);
     final now = DateTime.now();
-    final container = ProviderContainer(
-      overrides: [
-        transactionsProvider.overrideWith(() => _FakeTransactionsNotifier([])),
-      ],
+    final mesPassado = DateTime(now.year, now.month - 1, 10);
+
+    await repository.add(
+      description: 'Receita antiga',
+      amount: 500,
+      type: TransactionType.income,
+      categoryId: 10,
+      date: mesPassado,
     );
-    addTearDown(container.dispose);
-
-    expect(container.read(saldoDisponivelProvider), 0);
-
-    container.read(transactionsProvider.notifier).add(
-      Transaction(
-        id: 1,
-        description: 'Freela',
-        amount: 300,
-        type: TransactionType.income,
-        categoryId: 11,
-        date: now,
-      ),
+    await repository.add(
+      description: 'Receita atual',
+      amount: 200,
+      type: TransactionType.income,
+      categoryId: 10,
+      date: now,
     );
 
-    expect(container.read(saldoDisponivelProvider), 300);
+    final summary = await container.read(dashboardSummaryProvider.future);
+
+    expect(summary.saldo, 700);
+    expect(summary.receitasDoMes, 200);
   });
 }

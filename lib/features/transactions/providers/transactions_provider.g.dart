@@ -9,12 +9,68 @@ part of 'transactions_provider.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
-@ProviderFor(TransactionsNotifier)
-final transactionsProvider = TransactionsNotifierProvider._();
+@ProviderFor(transactionsRepository)
+final transactionsRepositoryProvider = TransactionsRepositoryProvider._();
 
-final class TransactionsNotifierProvider
-    extends $NotifierProvider<TransactionsNotifier, List<Transaction>> {
-  TransactionsNotifierProvider._()
+final class TransactionsRepositoryProvider
+    extends
+        $FunctionalProvider<
+          TransactionsRepository,
+          TransactionsRepository,
+          TransactionsRepository
+        >
+    with $Provider<TransactionsRepository> {
+  TransactionsRepositoryProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'transactionsRepositoryProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$transactionsRepositoryHash();
+
+  @$internal
+  @override
+  $ProviderElement<TransactionsRepository> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  TransactionsRepository create(Ref ref) {
+    return transactionsRepository(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(TransactionsRepository value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<TransactionsRepository>(value),
+    );
+  }
+}
+
+String _$transactionsRepositoryHash() =>
+    r'3fe2220a2617c7e21b5e4a61db61711dc6ba62db';
+
+@ProviderFor(transactions)
+final transactionsProvider = TransactionsProvider._();
+
+final class TransactionsProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<Transaction>>,
+          List<Transaction>,
+          Stream<List<Transaction>>
+        >
+    with
+        $FutureModifier<List<Transaction>>,
+        $StreamProvider<List<Transaction>> {
+  TransactionsProvider._()
     : super(
         from: null,
         argument: null,
@@ -26,48 +82,33 @@ final class TransactionsNotifierProvider
       );
 
   @override
-  String debugGetCreateSourceHash() => _$transactionsNotifierHash();
+  String debugGetCreateSourceHash() => _$transactionsHash();
 
   @$internal
   @override
-  TransactionsNotifier create() => TransactionsNotifier();
+  $StreamProviderElement<List<Transaction>> $createElement(
+    $ProviderPointer pointer,
+  ) => $StreamProviderElement(pointer);
 
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(List<Transaction> value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<List<Transaction>>(value),
-    );
-  }
-}
-
-String _$transactionsNotifierHash() =>
-    r'078e4b4c41a4f10c7044291de7b4a2ac9d2b3296';
-
-abstract class _$TransactionsNotifier extends $Notifier<List<Transaction>> {
-  List<Transaction> build();
-  @$mustCallSuper
   @override
-  WhenComplete runBuild() {
-    final ref = this.ref as $Ref<List<Transaction>, List<Transaction>>;
-    final element =
-        ref.element
-            as $ClassProviderElement<
-              AnyNotifier<List<Transaction>, List<Transaction>>,
-              List<Transaction>,
-              Object?,
-              Object?
-            >;
-    return element.handleCreate(ref, build);
+  Stream<List<Transaction>> create(Ref ref) {
+    return transactions(ref);
   }
 }
+
+String _$transactionsHash() => r'9b0708a0acde088ac8ffb46e8d5869e5d438d7da';
 
 @ProviderFor(transactionById)
 final transactionByIdProvider = TransactionByIdFamily._();
 
 final class TransactionByIdProvider
-    extends $FunctionalProvider<Transaction, Transaction, Transaction>
-    with $Provider<Transaction> {
+    extends
+        $FunctionalProvider<
+          AsyncValue<Transaction>,
+          Transaction,
+          FutureOr<Transaction>
+        >
+    with $FutureModifier<Transaction>, $FutureProvider<Transaction> {
   TransactionByIdProvider._({
     required TransactionByIdFamily super.from,
     required int super.argument,
@@ -91,21 +132,14 @@ final class TransactionByIdProvider
 
   @$internal
   @override
-  $ProviderElement<Transaction> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
+  $FutureProviderElement<Transaction> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
 
   @override
-  Transaction create(Ref ref) {
+  FutureOr<Transaction> create(Ref ref) {
     final argument = this.argument as int;
     return transactionById(ref, argument);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(Transaction value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<Transaction>(value),
-    );
   }
 
   @override
@@ -119,10 +153,10 @@ final class TransactionByIdProvider
   }
 }
 
-String _$transactionByIdHash() => r'053a21d51d13ddb101fcec7183f88a5961df20b2';
+String _$transactionByIdHash() => r'74ebc4743b0ae9c8d398cb113e9190eaca3bdcf1';
 
 final class TransactionByIdFamily extends $Family
-    with $FunctionalFamilyOverride<Transaction, int> {
+    with $FunctionalFamilyOverride<FutureOr<Transaction>, int> {
   TransactionByIdFamily._()
     : super(
         retry: null,

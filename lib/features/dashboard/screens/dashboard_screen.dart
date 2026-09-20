@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/mock/mock_data.dart';
 import '../../../core/utils/formatters.dart';
 import '../../transactions/models/transaction.dart';
+import '../../transactions/providers/categories_provider.dart';
 import '../providers/dashboard_providers.dart';
 
 class DashboardScreen extends ConsumerWidget {
@@ -11,23 +11,33 @@ class DashboardScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final saldo = ref.watch(saldoDisponivelProvider);
-    final monthIncome = ref.watch(receitasDoMesProvider);
-    final monthExpense = ref.watch(despesasDoMesProvider);
-    final categoryTotals = ref.watch(gastosPorCategoriaDoMesProvider);
-    final recentTransactions = ref.watch(ultimasTransacoesProvider);
+    final summaryAsync = ref.watch(dashboardSummaryProvider);
+    final categoriesAsync = ref.watch(categoriesProvider);
+
+    if (summaryAsync.isLoading || categoriesAsync.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (summaryAsync.hasError) {
+      return Center(child: Text('Erro ao carregar o dashboard: ${summaryAsync.error}'));
+    }
+    if (categoriesAsync.hasError) {
+      return Center(child: Text('Erro ao carregar categorias: ${categoriesAsync.error}'));
+    }
+
+    final summary = summaryAsync.requireValue;
+    final categoryMap = {for (final c in categoriesAsync.requireValue) c.id: c};
 
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        _BalanceCard(saldo: saldo),
+        _BalanceCard(saldo: summary.saldo),
         const SizedBox(height: 16),
         Row(
           children: [
             Expanded(
               child: _SummaryCard(
                 label: 'Receitas do mês',
-                value: monthIncome,
+                value: summary.receitasDoMes,
                 color: Colors.green,
                 icon: Icons.arrow_upward,
               ),
@@ -36,7 +46,7 @@ class DashboardScreen extends ConsumerWidget {
             Expanded(
               child: _SummaryCard(
                 label: 'Despesas do mês',
-                value: monthExpense,
+                value: summary.despesasDoMes,
                 color: Colors.red,
                 icon: Icons.arrow_downward,
               ),
@@ -46,7 +56,7 @@ class DashboardScreen extends ConsumerWidget {
         const SizedBox(height: 24),
         Text('Gastos por categoria', style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),
-        if (categoryTotals.isEmpty)
+        if (summary.gastosPorCategoriaDoMes.isEmpty)
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 8),
             child: Text('Nenhuma despesa neste mês.'),
@@ -54,11 +64,11 @@ class DashboardScreen extends ConsumerWidget {
         else
           Card(
             child: Column(
-              children: categoryTotals.entries.map((entry) {
-                final category = MockData.categoryById(entry.key);
+              children: summary.gastosPorCategoriaDoMes.entries.map((entry) {
+                final category = categoryMap[entry.key];
                 return ListTile(
-                  leading: Icon(category.icon),
-                  title: Text(category.name),
+                  leading: Icon(category?.icon ?? Icons.category),
+                  title: Text(category?.name ?? 'Categoria'),
                   trailing: Text(formatCurrency(entry.value)),
                 );
               }).toList(),
@@ -67,7 +77,7 @@ class DashboardScreen extends ConsumerWidget {
         const SizedBox(height: 24),
         Text('Últimas transações', style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),
-        if (recentTransactions.isEmpty)
+        if (summary.ultimasTransacoes.isEmpty)
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 8),
             child: Text('Nenhuma transação cadastrada ainda.'),
@@ -75,13 +85,13 @@ class DashboardScreen extends ConsumerWidget {
         else
           Card(
             child: Column(
-              children: recentTransactions.map((transaction) {
-                final category = MockData.categoryById(transaction.categoryId);
+              children: summary.ultimasTransacoes.map((transaction) {
+                final category = categoryMap[transaction.categoryId];
                 final isIncome = transaction.type == TransactionType.income;
                 return ListTile(
-                  leading: Icon(category.icon),
+                  leading: Icon(category?.icon ?? Icons.category),
                   title: Text(transaction.description),
-                  subtitle: Text('${category.name} · ${formatDate(transaction.date)}'),
+                  subtitle: Text('${category?.name ?? 'Categoria'} · ${formatDate(transaction.date)}'),
                   trailing: Text(
                     '${isIncome ? '+' : '-'} ${formatCurrency(transaction.amount)}',
                     style: TextStyle(

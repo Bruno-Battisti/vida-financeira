@@ -1,35 +1,23 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../core/mock/mock_data.dart';
+import '../../../database/providers.dart';
 import '../models/goal.dart';
+import '../repositories/goals_repository.dart';
 
 part 'goals_provider.g.dart';
 
 @riverpod
-class GoalsNotifier extends _$GoalsNotifier {
-  @override
-  List<Goal> build() {
-    return [...MockData.goals];
-  }
-
-  void add(Goal goal) {
-    state = [...state, goal];
-  }
-
-  void update(Goal goal) {
-    state = [
-      for (final g in state)
-        if (g.id == goal.id) goal else g,
-    ];
-  }
-
-  void remove(int id) {
-    state = state.where((g) => g.id != id).toList();
-  }
+GoalsRepository goalsRepository(Ref ref) {
+  return GoalsRepository(ref.watch(appDatabaseProvider));
 }
 
 @riverpod
-Goal goalById(Ref ref, int id) {
-  final goals = ref.watch(goalsProvider);
+Stream<List<Goal>> goals(Ref ref) {
+  return ref.watch(goalsRepositoryProvider).watchAll();
+}
+
+@riverpod
+Future<Goal> goalById(Ref ref, int id) async {
+  final goals = await ref.watch(goalsProvider.future);
   return goals.firstWhere((g) => g.id == id);
 }

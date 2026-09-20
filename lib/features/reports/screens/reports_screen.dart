@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/mock/mock_data.dart';
 import '../../../core/utils/formatters.dart';
 import '../../transactions/models/transaction.dart';
+import '../../transactions/providers/categories_provider.dart';
 import '../../transactions/providers/transactions_provider.dart';
 
 class ReportsScreen extends ConsumerWidget {
@@ -11,7 +11,22 @@ class ReportsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final transactions = ref.watch(transactionsProvider);
+    final transactionsAsync = ref.watch(transactionsProvider);
+    final categoriesAsync = ref.watch(categoriesProvider);
+
+    if (transactionsAsync.isLoading || categoriesAsync.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (transactionsAsync.hasError) {
+      return Center(child: Text('Erro: ${transactionsAsync.error}'));
+    }
+    if (categoriesAsync.hasError) {
+      return Center(child: Text('Erro: ${categoriesAsync.error}'));
+    }
+
+    final transactions = transactionsAsync.requireValue;
+    final categoryMap = {for (final c in categoriesAsync.requireValue) c.id: c};
+
     final totalIncome = transactions
         .where((t) => t.type == TransactionType.income)
         .fold(0.0, (sum, t) => sum + t.amount);
@@ -70,11 +85,11 @@ class ReportsScreen extends ConsumerWidget {
                   const Text('Nenhuma despesa registrada.')
                 else
                   ...sortedCategories.map((entry) {
-                    final category = MockData.categoryById(entry.key);
+                    final category = categoryMap[entry.key];
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 10),
                       child: _ComparisonBar(
-                        label: category.name,
+                        label: category?.name ?? 'Categoria',
                         value: entry.value,
                         ratio: entry.value / maxCategoryValue,
                         color: Theme.of(context).colorScheme.primary,

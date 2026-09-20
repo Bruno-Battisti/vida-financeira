@@ -9,12 +9,60 @@ part of 'goals_provider.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
-@ProviderFor(GoalsNotifier)
-final goalsProvider = GoalsNotifierProvider._();
+@ProviderFor(goalsRepository)
+final goalsRepositoryProvider = GoalsRepositoryProvider._();
 
-final class GoalsNotifierProvider
-    extends $NotifierProvider<GoalsNotifier, List<Goal>> {
-  GoalsNotifierProvider._()
+final class GoalsRepositoryProvider
+    extends
+        $FunctionalProvider<GoalsRepository, GoalsRepository, GoalsRepository>
+    with $Provider<GoalsRepository> {
+  GoalsRepositoryProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'goalsRepositoryProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$goalsRepositoryHash();
+
+  @$internal
+  @override
+  $ProviderElement<GoalsRepository> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  GoalsRepository create(Ref ref) {
+    return goalsRepository(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(GoalsRepository value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<GoalsRepository>(value),
+    );
+  }
+}
+
+String _$goalsRepositoryHash() => r'b89a2fed1835226180f3d801e44f53096e4d551d';
+
+@ProviderFor(goals)
+final goalsProvider = GoalsProvider._();
+
+final class GoalsProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<Goal>>,
+          List<Goal>,
+          Stream<List<Goal>>
+        >
+    with $FutureModifier<List<Goal>>, $StreamProvider<List<Goal>> {
+  GoalsProvider._()
     : super(
         from: null,
         argument: null,
@@ -26,46 +74,27 @@ final class GoalsNotifierProvider
       );
 
   @override
-  String debugGetCreateSourceHash() => _$goalsNotifierHash();
+  String debugGetCreateSourceHash() => _$goalsHash();
 
   @$internal
   @override
-  GoalsNotifier create() => GoalsNotifier();
+  $StreamProviderElement<List<Goal>> $createElement($ProviderPointer pointer) =>
+      $StreamProviderElement(pointer);
 
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(List<Goal> value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<List<Goal>>(value),
-    );
-  }
-}
-
-String _$goalsNotifierHash() => r'b13a81c787fd728f68aa7f7d386a199ca0bf174c';
-
-abstract class _$GoalsNotifier extends $Notifier<List<Goal>> {
-  List<Goal> build();
-  @$mustCallSuper
   @override
-  WhenComplete runBuild() {
-    final ref = this.ref as $Ref<List<Goal>, List<Goal>>;
-    final element =
-        ref.element
-            as $ClassProviderElement<
-              AnyNotifier<List<Goal>, List<Goal>>,
-              List<Goal>,
-              Object?,
-              Object?
-            >;
-    return element.handleCreate(ref, build);
+  Stream<List<Goal>> create(Ref ref) {
+    return goals(ref);
   }
 }
+
+String _$goalsHash() => r'0de6803cf30c9a65e1fa7e034f59eeafae53a514';
 
 @ProviderFor(goalById)
 final goalByIdProvider = GoalByIdFamily._();
 
-final class GoalByIdProvider extends $FunctionalProvider<Goal, Goal, Goal>
-    with $Provider<Goal> {
+final class GoalByIdProvider
+    extends $FunctionalProvider<AsyncValue<Goal>, Goal, FutureOr<Goal>>
+    with $FutureModifier<Goal>, $FutureProvider<Goal> {
   GoalByIdProvider._({
     required GoalByIdFamily super.from,
     required int super.argument,
@@ -89,21 +118,13 @@ final class GoalByIdProvider extends $FunctionalProvider<Goal, Goal, Goal>
 
   @$internal
   @override
-  $ProviderElement<Goal> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
+  $FutureProviderElement<Goal> $createElement($ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
 
   @override
-  Goal create(Ref ref) {
+  FutureOr<Goal> create(Ref ref) {
     final argument = this.argument as int;
     return goalById(ref, argument);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(Goal value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<Goal>(value),
-    );
   }
 
   @override
@@ -117,10 +138,10 @@ final class GoalByIdProvider extends $FunctionalProvider<Goal, Goal, Goal>
   }
 }
 
-String _$goalByIdHash() => r'5d6502ffd01a0644a7f38b6d3140aebd6b4b2c25';
+String _$goalByIdHash() => r'45d132432abbb61592baf622869950bea7cf18e6';
 
 final class GoalByIdFamily extends $Family
-    with $FunctionalFamilyOverride<Goal, int> {
+    with $FunctionalFamilyOverride<FutureOr<Goal>, int> {
   GoalByIdFamily._()
     : super(
         retry: null,

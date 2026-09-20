@@ -11,16 +11,22 @@ class GoalsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final goals = ref.watch(goalsProvider);
+    final goalsAsync = ref.watch(goalsProvider);
 
-    if (goals.isEmpty) {
-      return const Center(child: Text('Nenhuma meta cadastrada.'));
-    }
+    return goalsAsync.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, _) => Center(child: Text('Erro: $error')),
+      data: (goals) {
+        if (goals.isEmpty) {
+          return const Center(child: Text('Nenhuma meta cadastrada.'));
+        }
 
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: goals.length,
-      itemBuilder: (context, index) => _GoalCard(goal: goals[index]),
+        return ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: goals.length,
+          itemBuilder: (context, index) => _GoalCard(goal: goals[index]),
+        );
+      },
     );
   }
 }

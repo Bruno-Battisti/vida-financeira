@@ -5,42 +5,31 @@ import '../../transactions/providers/transactions_provider.dart';
 
 part 'dashboard_providers.g.dart';
 
+typedef DashboardSummary = ({
+  double saldo,
+  double receitasDoMes,
+  double despesasDoMes,
+  Map<int, double> gastosPorCategoriaDoMes,
+  List<Transaction> ultimasTransacoes,
+});
+
 @riverpod
-List<Transaction> transactionsDoMes(Ref ref) {
-  final transactions = ref.watch(transactionsProvider);
+Future<DashboardSummary> dashboardSummary(Ref ref) async {
+  final transactions = await ref.watch(transactionsProvider.future);
   final now = DateTime.now();
-  return transactions
+
+  final monthTransactions = transactions
       .where((t) => t.date.year == now.year && t.date.month == now.month)
       .toList();
-}
 
-@riverpod
-double saldoDisponivel(Ref ref) {
-  final transactions = ref.watch(transactionsProvider);
-  return _sumByType(transactions, TransactionType.income) -
-      _sumByType(transactions, TransactionType.expense);
-}
-
-@riverpod
-double receitasDoMes(Ref ref) {
-  return _sumByType(ref.watch(transactionsDoMesProvider), TransactionType.income);
-}
-
-@riverpod
-double despesasDoMes(Ref ref) {
-  return _sumByType(ref.watch(transactionsDoMesProvider), TransactionType.expense);
-}
-
-@riverpod
-Map<int, double> gastosPorCategoriaDoMes(Ref ref) {
-  final transactions = ref.watch(transactionsDoMesProvider);
-  return _expenseTotalsByCategory(transactions);
-}
-
-@riverpod
-List<Transaction> ultimasTransacoes(Ref ref) {
-  final transactions = ref.watch(transactionsProvider);
-  return transactions.take(5).toList();
+  return (
+    saldo: _sumByType(transactions, TransactionType.income) -
+        _sumByType(transactions, TransactionType.expense),
+    receitasDoMes: _sumByType(monthTransactions, TransactionType.income),
+    despesasDoMes: _sumByType(monthTransactions, TransactionType.expense),
+    gastosPorCategoriaDoMes: _expenseTotalsByCategory(monthTransactions),
+    ultimasTransacoes: transactions.take(5).toList(),
+  );
 }
 
 double _sumByType(List<Transaction> transactions, TransactionType type) {

@@ -9,12 +9,65 @@ part of 'categories_provider.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
+@ProviderFor(categoriesRepository)
+final categoriesRepositoryProvider = CategoriesRepositoryProvider._();
+
+final class CategoriesRepositoryProvider
+    extends
+        $FunctionalProvider<
+          CategoriesRepository,
+          CategoriesRepository,
+          CategoriesRepository
+        >
+    with $Provider<CategoriesRepository> {
+  CategoriesRepositoryProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'categoriesRepositoryProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$categoriesRepositoryHash();
+
+  @$internal
+  @override
+  $ProviderElement<CategoriesRepository> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  CategoriesRepository create(Ref ref) {
+    return categoriesRepository(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(CategoriesRepository value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<CategoriesRepository>(value),
+    );
+  }
+}
+
+String _$categoriesRepositoryHash() =>
+    r'5861ab61219d5cdee136b50e4400753b69fd0e02';
+
 @ProviderFor(categories)
 final categoriesProvider = CategoriesProvider._();
 
 final class CategoriesProvider
-    extends $FunctionalProvider<List<Category>, List<Category>, List<Category>>
-    with $Provider<List<Category>> {
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<Category>>,
+          List<Category>,
+          Stream<List<Category>>
+        >
+    with $FutureModifier<List<Category>>, $StreamProvider<List<Category>> {
   CategoriesProvider._()
     : super(
         from: null,
@@ -31,31 +84,25 @@ final class CategoriesProvider
 
   @$internal
   @override
-  $ProviderElement<List<Category>> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
+  $StreamProviderElement<List<Category>> $createElement(
+    $ProviderPointer pointer,
+  ) => $StreamProviderElement(pointer);
 
   @override
-  List<Category> create(Ref ref) {
+  Stream<List<Category>> create(Ref ref) {
     return categories(ref);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(List<Category> value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<List<Category>>(value),
-    );
   }
 }
 
-String _$categoriesHash() => r'eaa8232967a0059f0392f26c8d9442203f61aaa3';
+String _$categoriesHash() => r'961ce145d0f7fbc77ded630f5593373eb6b0b1e0';
 
 @ProviderFor(categoryById)
 final categoryByIdProvider = CategoryByIdFamily._();
 
 final class CategoryByIdProvider
-    extends $FunctionalProvider<Category, Category, Category>
-    with $Provider<Category> {
+    extends
+        $FunctionalProvider<AsyncValue<Category>, Category, FutureOr<Category>>
+    with $FutureModifier<Category>, $FutureProvider<Category> {
   CategoryByIdProvider._({
     required CategoryByIdFamily super.from,
     required int super.argument,
@@ -79,21 +126,13 @@ final class CategoryByIdProvider
 
   @$internal
   @override
-  $ProviderElement<Category> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
+  $FutureProviderElement<Category> $createElement($ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
 
   @override
-  Category create(Ref ref) {
+  FutureOr<Category> create(Ref ref) {
     final argument = this.argument as int;
     return categoryById(ref, argument);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(Category value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<Category>(value),
-    );
   }
 
   @override
@@ -107,10 +146,10 @@ final class CategoryByIdProvider
   }
 }
 
-String _$categoryByIdHash() => r'28000a490df6263dcd085894a26e9788cf8c7330';
+String _$categoryByIdHash() => r'7cf95cc84eb287039c5322b4a751635c528a63ee';
 
 final class CategoryByIdFamily extends $Family
-    with $FunctionalFamilyOverride<Category, int> {
+    with $FunctionalFamilyOverride<FutureOr<Category>, int> {
   CategoryByIdFamily._()
     : super(
         retry: null,

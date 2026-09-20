@@ -1,0 +1,12 @@
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+import 'database.dart';
+
+part 'providers.g.dart';
+
+@Riverpod(keepAlive: true)
+AppDatabase appDatabase(Ref ref) {
+  final db = AppDatabase();
+  ref.onDispose(db.close);
+  return db;
+}
