@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 import 'package:vida_financeira/app/app.dart';
 import 'package:vida_financeira/features/goals/providers/goals_provider.dart';
@@ -22,6 +23,8 @@ Widget _appWithFakeRepositories() {
 }
 
 void main() {
+  setUpAll(() => initializeDateFormatting('pt_BR'));
+
   testWidgets('Formulário de nova transação não salva com campos vazios', (WidgetTester tester) async {
     await tester.pumpWidget(_appWithFakeRepositories());
     await tester.pumpAndSettle();
