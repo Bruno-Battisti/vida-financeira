@@ -5,6 +5,7 @@ import '../../../core/utils/formatters.dart';
 import '../../transactions/models/transaction.dart';
 import '../../transactions/providers/categories_provider.dart';
 import '../providers/dashboard_providers.dart';
+import '../widgets/exchange_rate_card.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
@@ -31,6 +32,8 @@ class DashboardScreen extends ConsumerWidget {
       padding: const EdgeInsets.all(16),
       children: [
         _BalanceCard(saldo: summary.saldo),
+        const SizedBox(height: 16),
+        const ExchangeRateCard(),
         const SizedBox(height: 16),
         Row(
           children: [

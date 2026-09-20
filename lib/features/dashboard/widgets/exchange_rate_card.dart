@@ -1,0 +1,78 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../providers/exchange_rate_provider.dart';
+
+class ExchangeRateCard extends ConsumerWidget {
+  const ExchangeRateCard({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final rateAsync = ref.watch(exchangeRateProvider);
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: rateAsync.when(
+          loading: () => const Row(
+            children: [
+              SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)),
+              SizedBox(width: 12),
+              Text('Buscando cotação do dólar...'),
+            ],
+          ),
+          error: (error, _) => Row(
+            children: [
+              Icon(Icons.cloud_off, color: Theme.of(context).colorScheme.error),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  '$error',
+                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.refresh),
+                tooltip: 'Tentar novamente',
+                onPressed: () => ref.invalidate(exchangeRateProvider),
+              ),
+            ],
+          ),
+          data: (rate) {
+            final isUp = rate.pctChange >= 0;
+            return Row(
+              children: [
+                const Icon(Icons.attach_money),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Dólar hoje', style: Theme.of(context).textTheme.bodySmall),
+                      Text(
+                        'R\$ ${rate.bid.toStringAsFixed(2)}',
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                      ),
+                    ],
+                  ),
+                ),
+                Text(
+                  '${isUp ? '+' : ''}${rate.pctChange.toStringAsFixed(2)}%',
+                  style: TextStyle(
+                    color: isUp ? Colors.green : Colors.red,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.refresh),
+                  tooltip: 'Atualizar cotação',
+                  onPressed: () => ref.invalidate(exchangeRateProvider),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+}

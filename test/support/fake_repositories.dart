@@ -1,13 +1,18 @@
+import 'dart:convert';
+
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:vida_financeira/app/app.dart';
 import 'package:vida_financeira/core/constants/category_icons.dart';
 import 'package:vida_financeira/core/providers/firebase_providers.dart';
 import 'package:vida_financeira/core/providers/shared_preferences_provider.dart';
+import 'package:vida_financeira/features/dashboard/providers/exchange_rate_provider.dart';
 import 'package:vida_financeira/features/goals/providers/goals_provider.dart';
 import 'package:vida_financeira/features/goals/repositories/goals_repository.dart';
 import 'package:vida_financeira/features/transactions/models/category.dart';
@@ -92,6 +97,23 @@ Future<Widget> appWithFakeRepositories() async {
     signedIn: true,
   );
 
+  // Evita que o card de cotação do Dashboard bata na API de verdade
+  // durante os testes de widget.
+  final httpClient = MockClient((request) async {
+    return http.Response(
+      jsonEncode({
+        'USDBRL': {
+          'bid': '5.4321',
+          'high': '5.45',
+          'low': '5.40',
+          'pctChange': '0.18',
+          'timestamp': '1695123456',
+        },
+      }),
+      200,
+    );
+  });
+
   return ProviderScope(
     overrides: [
       sharedPreferencesProvider.overrideWithValue(prefs),
@@ -99,6 +121,7 @@ Future<Widget> appWithFakeRepositories() async {
       transactionsRepositoryProvider.overrideWithValue(transactionsRepository),
       goalsRepositoryProvider.overrideWithValue(goalsRepository),
       categoriesRepositoryProvider.overrideWithValue(FakeCategoriesRepository()),
+      httpClientProvider.overrideWithValue(httpClient),
     ],
     child: const VidaFinanceiraApp(),
   );

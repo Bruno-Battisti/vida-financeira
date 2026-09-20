@@ -13,6 +13,7 @@ void main() {
 
     expect(find.text('Início'), findsWidgets);
     expect(find.text('Saldo disponível'), findsOneWidget);
+    expect(find.text('R\$ 5.43'), findsOneWidget);
 
     await tester.tap(find.text('Transações'));
     await tester.pumpAndSettle();
