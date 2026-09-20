@@ -98,41 +98,95 @@ final class ExchangeRateRepositoryProvider
 String _$exchangeRateRepositoryHash() =>
     r'a7f9c4fcea8f73e6f490ff8b234f24b8715967ae';
 
-@ProviderFor(exchangeRate)
-final exchangeRateProvider = ExchangeRateProvider._();
+@ProviderFor(exchangeRates)
+final exchangeRatesProvider = ExchangeRatesProvider._();
 
-final class ExchangeRateProvider
+final class ExchangeRatesProvider
     extends
         $FunctionalProvider<
-          AsyncValue<ExchangeRate>,
-          ExchangeRate,
-          FutureOr<ExchangeRate>
+          AsyncValue<Map<CurrencyType, ExchangeRate>>,
+          Map<CurrencyType, ExchangeRate>,
+          FutureOr<Map<CurrencyType, ExchangeRate>>
         >
-    with $FutureModifier<ExchangeRate>, $FutureProvider<ExchangeRate> {
-  ExchangeRateProvider._()
+    with
+        $FutureModifier<Map<CurrencyType, ExchangeRate>>,
+        $FutureProvider<Map<CurrencyType, ExchangeRate>> {
+  ExchangeRatesProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'exchangeRateProvider',
+        name: r'exchangeRatesProvider',
         isAutoDispose: true,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$exchangeRateHash();
+  String debugGetCreateSourceHash() => _$exchangeRatesHash();
 
   @$internal
   @override
-  $FutureProviderElement<ExchangeRate> $createElement(
+  $FutureProviderElement<Map<CurrencyType, ExchangeRate>> $createElement(
     $ProviderPointer pointer,
   ) => $FutureProviderElement(pointer);
 
   @override
-  FutureOr<ExchangeRate> create(Ref ref) {
-    return exchangeRate(ref);
+  FutureOr<Map<CurrencyType, ExchangeRate>> create(Ref ref) {
+    return exchangeRates(ref);
   }
 }
 
-String _$exchangeRateHash() => r'83e3c65f8c5e467d687e7b28722cf8ea7a3117b5';
+String _$exchangeRatesHash() => r'f18bd78d69243603c471970383e95e76e75dbaf9';
+
+@ProviderFor(SelectedCurrency)
+final selectedCurrencyProvider = SelectedCurrencyProvider._();
+
+final class SelectedCurrencyProvider
+    extends $NotifierProvider<SelectedCurrency, CurrencyType> {
+  SelectedCurrencyProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'selectedCurrencyProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$selectedCurrencyHash();
+
+  @$internal
+  @override
+  SelectedCurrency create() => SelectedCurrency();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(CurrencyType value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<CurrencyType>(value),
+    );
+  }
+}
+
+String _$selectedCurrencyHash() => r'1b4869962210b459d6c4661f0c5c6799a303702c';
+
+abstract class _$SelectedCurrency extends $Notifier<CurrencyType> {
+  CurrencyType build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<CurrencyType, CurrencyType>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<CurrencyType, CurrencyType>,
+              CurrencyType,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}

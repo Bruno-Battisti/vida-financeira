@@ -4,52 +4,56 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 
+import 'package:vida_financeira/features/dashboard/models/currency_type.dart';
 import 'package:vida_financeira/features/dashboard/repositories/exchange_rate_repository.dart';
 
+Map<String, dynamic> _rate({String bid = '5.4321'}) => {
+      'bid': bid,
+      'high': '5.45',
+      'low': '5.40',
+      'pctChange': '0.18',
+      'timestamp': '1695123456',
+    };
+
 void main() {
-  test('fetchUsdToBrl() interpreta uma resposta válida', () async {
+  test('fetchRates() interpreta uma resposta válida para todas as moedas', () async {
     final client = MockClient((request) async {
       return http.Response(
         jsonEncode({
-          'USDBRL': {
-            'bid': '5.4321',
-            'high': '5.45',
-            'low': '5.40',
-            'pctChange': '0.18',
-            'timestamp': '1695123456',
-          },
+          'USDBRL': _rate(bid: '5.4321'),
+          'BTCBRL': _rate(bid: '350000.00'),
+          'EURBRL': _rate(bid: '5.90'),
         }),
         200,
       );
     });
 
     final repository = ExchangeRateRepository(client);
-    final rate = await repository.fetchUsdToBrl();
+    final rates = await repository.fetchRates();
 
-    expect(rate.bid, 5.4321);
-    expect(rate.high, 5.45);
-    expect(rate.low, 5.40);
-    expect(rate.pctChange, 0.18);
+    expect(rates[CurrencyType.usd]!.bid, 5.4321);
+    expect(rates[CurrencyType.btc]!.bid, 350000.00);
+    expect(rates[CurrencyType.eur]!.bid, 5.90);
   });
 
-  test('fetchUsdToBrl() lança erro amigável quando o servidor responde com falha', () async {
+  test('fetchRates() lança erro amigável quando o servidor responde com falha', () async {
     final client = MockClient((request) async => http.Response('erro interno', 500));
     final repository = ExchangeRateRepository(client);
 
-    expect(repository.fetchUsdToBrl(), throwsA(isA<ExchangeRateException>()));
+    expect(repository.fetchRates(), throwsA(isA<ExchangeRateException>()));
   });
 
-  test('fetchUsdToBrl() lança erro amigável quando não há conexão', () async {
+  test('fetchRates() lança erro amigável quando não há conexão', () async {
     final client = MockClient((request) async => throw Exception('sem rede'));
     final repository = ExchangeRateRepository(client);
 
-    expect(repository.fetchUsdToBrl(), throwsA(isA<ExchangeRateException>()));
+    expect(repository.fetchRates(), throwsA(isA<ExchangeRateException>()));
   });
 
-  test('fetchUsdToBrl() lança erro amigável para resposta malformada', () async {
+  test('fetchRates() lança erro amigável para resposta malformada', () async {
     final client = MockClient((request) async => http.Response('isso não é json', 200));
     final repository = ExchangeRateRepository(client);
 
-    expect(repository.fetchUsdToBrl(), throwsA(isA<ExchangeRateException>()));
+    expect(repository.fetchRates(), throwsA(isA<ExchangeRateException>()));
   });
 }

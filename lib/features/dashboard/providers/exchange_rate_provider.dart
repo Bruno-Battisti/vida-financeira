@@ -1,6 +1,7 @@
 import 'package:http/http.dart' as http;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../models/currency_type.dart';
 import '../models/exchange_rate.dart';
 import '../repositories/exchange_rate_repository.dart';
 
@@ -19,6 +20,14 @@ ExchangeRateRepository exchangeRateRepository(Ref ref) {
 }
 
 @riverpod
-Future<ExchangeRate> exchangeRate(Ref ref) {
-  return ref.watch(exchangeRateRepositoryProvider).fetchUsdToBrl();
+Future<Map<CurrencyType, ExchangeRate>> exchangeRates(Ref ref) {
+  return ref.watch(exchangeRateRepositoryProvider).fetchRates();
+}
+
+@riverpod
+class SelectedCurrency extends _$SelectedCurrency {
+  @override
+  CurrencyType build() => CurrencyType.usd;
+
+  void select(CurrencyType currency) => state = currency;
 }

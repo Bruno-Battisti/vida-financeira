@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../models/currency_type.dart';
 import '../models/exchange_rate.dart';
 
 /// Erro amigável para exibir na UI — já traduzido, sem vazar detalhes
@@ -20,9 +21,14 @@ class ExchangeRateRepository {
 
   final http.Client _client;
 
-  static final _uri = Uri.parse('https://economia.awesomeapi.com.br/json/last/USD-BRL');
+  static final _uri = Uri.parse(
+    'https://economia.awesomeapi.com.br/json/last/'
+    '${CurrencyType.values.map((c) => c.pair).join(',')}',
+  );
 
-  Future<ExchangeRate> fetchUsdToBrl() async {
+  /// Busca as cotações de todas as [CurrencyType] em uma única requisição —
+  /// a AwesomeAPI aceita múltiplos pares separados por vírgula na mesma URL.
+  Future<Map<CurrencyType, ExchangeRate>> fetchRates() async {
     final http.Response response;
     try {
       response = await _client.get(_uri).timeout(const Duration(seconds: 10));
@@ -36,16 +42,22 @@ class ExchangeRateRepository {
 
     try {
       final body = jsonDecode(response.body) as Map<String, dynamic>;
-      final data = body['USDBRL'] as Map<String, dynamic>;
-      return ExchangeRate(
-        bid: double.parse(data['bid'] as String),
-        high: double.parse(data['high'] as String),
-        low: double.parse(data['low'] as String),
-        pctChange: double.parse(data['pctChange'] as String),
-        updatedAt: DateTime.fromMillisecondsSinceEpoch(int.parse(data['timestamp'] as String) * 1000),
-      );
+      return {
+        for (final currency in CurrencyType.values)
+          currency: _parseRate(body[currency.responseKey] as Map<String, dynamic>),
+      };
     } catch (_) {
       throw ExchangeRateException('Não foi possível interpretar a resposta do serviço de cotação.');
     }
+  }
+
+  ExchangeRate _parseRate(Map<String, dynamic> data) {
+    return ExchangeRate(
+      bid: double.parse(data['bid'] as String),
+      high: double.parse(data['high'] as String),
+      low: double.parse(data['low'] as String),
+      pctChange: double.parse(data['pctChange'] as String),
+      updatedAt: DateTime.fromMillisecondsSinceEpoch(int.parse(data['timestamp'] as String) * 1000),
+    );
   }
 }
