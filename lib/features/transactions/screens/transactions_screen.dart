@@ -92,10 +92,14 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Formulário de cadastro chega na Fase 3.')),
-          );
+        onPressed: () async {
+          final created = await context.push<bool>('/transactions/new');
+          if (created == true && context.mounted) {
+            setState(() {});
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Transação criada com sucesso!')),
+            );
+          }
         },
         tooltip: 'Nova transação',
         child: const Icon(Icons.add),

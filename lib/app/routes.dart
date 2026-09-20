@@ -7,12 +7,13 @@ import '../features/goals/screens/goals_screen.dart';
 import '../features/reports/screens/reports_screen.dart';
 import '../features/settings/screens/settings_screen.dart';
 import '../features/transactions/screens/transaction_detail_screen.dart';
+import '../features/transactions/screens/transaction_form_screen.dart';
 import '../features/transactions/screens/transactions_screen.dart';
 import 'main_shell.dart';
 
 final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
 
-final GoRouter appRouter = GoRouter(
+GoRouter createRouter() => GoRouter(
   navigatorKey: rootNavigatorKey,
   initialLocation: '/',
   routes: [
@@ -36,7 +37,13 @@ final GoRouter appRouter = GoRouter(
               builder: (context, state) => const TransactionsScreen(),
               routes: [
                 GoRoute(
+                  path: 'new',
+                  parentNavigatorKey: rootNavigatorKey,
+                  builder: (context, state) => const TransactionFormScreen(),
+                ),
+                GoRoute(
                   path: ':id',
+                  parentNavigatorKey: rootNavigatorKey,
                   builder: (context, state) {
                     final id = int.parse(state.pathParameters['id']!);
                     return TransactionDetailScreen(transactionId: id);
@@ -54,6 +61,7 @@ final GoRouter appRouter = GoRouter(
               routes: [
                 GoRoute(
                   path: ':id',
+                  parentNavigatorKey: rootNavigatorKey,
                   builder: (context, state) {
                     final id = int.parse(state.pathParameters['id']!);
                     return GoalDetailScreen(goalId: id);
