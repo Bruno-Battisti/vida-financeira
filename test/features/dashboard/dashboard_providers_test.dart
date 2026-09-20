@@ -1,38 +1,27 @@
-import 'package:drift/native.dart';
+import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:vida_financeira/database/database.dart';
-import 'package:vida_financeira/database/providers.dart';
 import 'package:vida_financeira/features/dashboard/providers/dashboard_providers.dart';
 import 'package:vida_financeira/features/transactions/models/transaction.dart';
 import 'package:vida_financeira/features/transactions/providers/transactions_provider.dart';
+import 'package:vida_financeira/features/transactions/repositories/transactions_repository.dart';
 
-ProviderContainer _containerWithEmptyDb() {
-  final db = AppDatabase.forTesting(NativeDatabase.memory());
+ProviderContainer _containerWithEmptyFirestore() {
+  final repository = TransactionsRepository(FakeFirebaseFirestore(), 'user-1');
   final container = ProviderContainer(
-    overrides: [appDatabaseProvider.overrideWithValue(db)],
+    overrides: [transactionsRepositoryProvider.overrideWithValue(repository)],
   );
   // Mantém os providers autoDispose vivos durante o teste, como uma tela real faria.
   container.listen(transactionsProvider, (_, _) {});
   container.listen(dashboardSummaryProvider, (_, _) {});
   addTearDown(container.dispose);
-  addTearDown(db.close);
   return container;
-}
-
-Future<void> _clearSeedTransactions(ProviderContainer container) async {
-  final repository = container.read(transactionsRepositoryProvider);
-  final existentes = await container.read(transactionsProvider.future);
-  for (final t in existentes) {
-    await repository.remove(t.id);
-  }
 }
 
 void main() {
   test('dashboardSummaryProvider soma receitas e subtrai despesas do mês atual', () async {
-    final container = _containerWithEmptyDb();
-    await _clearSeedTransactions(container);
+    final container = _containerWithEmptyFirestore();
 
     final repository = container.read(transactionsRepositoryProvider);
     final now = DateTime.now();
@@ -59,8 +48,7 @@ void main() {
   });
 
   test('dashboardSummaryProvider ignora transações de meses anteriores nos totais do mês', () async {
-    final container = _containerWithEmptyDb();
-    await _clearSeedTransactions(container);
+    final container = _containerWithEmptyFirestore();
 
     final repository = container.read(transactionsRepositoryProvider);
     final now = DateTime.now();

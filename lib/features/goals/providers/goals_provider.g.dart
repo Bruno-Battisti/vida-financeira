@@ -49,7 +49,7 @@ final class GoalsRepositoryProvider
   }
 }
 
-String _$goalsRepositoryHash() => r'b89a2fed1835226180f3d801e44f53096e4d551d';
+String _$goalsRepositoryHash() => r'29a09dc1d9ba1b3237e839d44708a94172638220';
 
 @ProviderFor(goals)
 final goalsProvider = GoalsProvider._();
@@ -105,7 +105,7 @@ final class GoalByIdProvider
     with $FutureModifier<GoalProgress>, $FutureProvider<GoalProgress> {
   GoalByIdProvider._({
     required GoalByIdFamily super.from,
-    required int super.argument,
+    required String super.argument,
   }) : super(
          retry: null,
          name: r'goalByIdProvider',
@@ -132,7 +132,7 @@ final class GoalByIdProvider
 
   @override
   FutureOr<GoalProgress> create(Ref ref) {
-    final argument = this.argument as int;
+    final argument = this.argument as String;
     return goalById(ref, argument);
   }
 
@@ -147,10 +147,10 @@ final class GoalByIdProvider
   }
 }
 
-String _$goalByIdHash() => r'e796d822227ce60b860bd756a0b2d2050591423d';
+String _$goalByIdHash() => r'7a2aea027f2447d51c7c3db1802e5a598873f511';
 
 final class GoalByIdFamily extends $Family
-    with $FunctionalFamilyOverride<FutureOr<GoalProgress>, int> {
+    with $FunctionalFamilyOverride<FutureOr<GoalProgress>, String> {
   GoalByIdFamily._()
     : super(
         retry: null,
@@ -160,7 +160,8 @@ final class GoalByIdFamily extends $Family
         isAutoDispose: true,
       );
 
-  GoalByIdProvider call(int id) => GoalByIdProvider._(argument: id, from: this);
+  GoalByIdProvider call(String id) =>
+      GoalByIdProvider._(argument: id, from: this);
 
   @override
   String toString() => r'goalByIdProvider';
@@ -181,7 +182,7 @@ final class GoalEntriesProvider
         $StreamProvider<List<GoalTransaction>> {
   GoalEntriesProvider._({
     required GoalEntriesFamily super.from,
-    required int super.argument,
+    required String super.argument,
   }) : super(
          retry: null,
          name: r'goalEntriesProvider',
@@ -208,7 +209,7 @@ final class GoalEntriesProvider
 
   @override
   Stream<List<GoalTransaction>> create(Ref ref) {
-    final argument = this.argument as int;
+    final argument = this.argument as String;
     return goalEntries(ref, argument);
   }
 
@@ -223,10 +224,10 @@ final class GoalEntriesProvider
   }
 }
 
-String _$goalEntriesHash() => r'c3c6e8db619a60a2c73bf64500b74f1f8ce7933a';
+String _$goalEntriesHash() => r'a587dd45745319458c1ee9592c26a6405657844c';
 
 final class GoalEntriesFamily extends $Family
-    with $FunctionalFamilyOverride<Stream<List<GoalTransaction>>, int> {
+    with $FunctionalFamilyOverride<Stream<List<GoalTransaction>>, String> {
   GoalEntriesFamily._()
     : super(
         retry: null,
@@ -236,7 +237,7 @@ final class GoalEntriesFamily extends $Family
         isAutoDispose: true,
       );
 
-  GoalEntriesProvider call(int goalId) =>
+  GoalEntriesProvider call(String goalId) =>
       GoalEntriesProvider._(argument: goalId, from: this);
 
   @override

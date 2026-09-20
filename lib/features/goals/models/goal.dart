@@ -5,7 +5,7 @@ part 'goal.freezed.dart';
 @freezed
 abstract class Goal with _$Goal {
   const factory Goal({
-    required int id,
+    required String id,
     required String name,
     required double targetAmount,
     DateTime? deadline,

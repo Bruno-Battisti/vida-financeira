@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/theme_mode_provider.dart';
+import '../../../core/providers/firebase_providers.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -9,11 +10,24 @@ class SettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(themeModeProvider);
+    final user = ref.watch(firebaseAuthProvider).currentUser;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Configurações')),
       body: ListView(
         children: [
+          const _SectionLabel('Conta'),
+          ListTile(
+            leading: const Icon(Icons.account_circle_outlined),
+            title: Text(user?.email ?? 'Não autenticado'),
+            subtitle: const Text('Seus dados ficam sincronizados nesta conta'),
+          ),
+          ListTile(
+            leading: const Icon(Icons.logout),
+            title: const Text('Sair'),
+            onTap: () => ref.read(firebaseAuthProvider).signOut(),
+          ),
+          const Divider(),
           const _SectionLabel('Aparência'),
           ListTile(
             leading: const Icon(Icons.dark_mode_outlined),

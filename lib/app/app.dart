@@ -14,7 +14,13 @@ class VidaFinanceiraApp extends ConsumerStatefulWidget {
 }
 
 class _VidaFinanceiraAppState extends ConsumerState<VidaFinanceiraApp> {
-  late final GoRouter _router = createRouter();
+  late final GoRouter _router;
+
+  @override
+  void initState() {
+    super.initState();
+    _router = createRouter(ref);
+  }
 
   @override
   Widget build(BuildContext context) {

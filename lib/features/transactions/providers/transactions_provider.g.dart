@@ -55,7 +55,7 @@ final class TransactionsRepositoryProvider
 }
 
 String _$transactionsRepositoryHash() =>
-    r'3fe2220a2617c7e21b5e4a61db61711dc6ba62db';
+    r'58a98d2beb294787d6c636c9ad58190a0382163e';
 
 @ProviderFor(transactions)
 final transactionsProvider = TransactionsProvider._();
@@ -111,7 +111,7 @@ final class TransactionByIdProvider
     with $FutureModifier<Transaction>, $FutureProvider<Transaction> {
   TransactionByIdProvider._({
     required TransactionByIdFamily super.from,
-    required int super.argument,
+    required String super.argument,
   }) : super(
          retry: null,
          name: r'transactionByIdProvider',
@@ -138,7 +138,7 @@ final class TransactionByIdProvider
 
   @override
   FutureOr<Transaction> create(Ref ref) {
-    final argument = this.argument as int;
+    final argument = this.argument as String;
     return transactionById(ref, argument);
   }
 
@@ -153,10 +153,10 @@ final class TransactionByIdProvider
   }
 }
 
-String _$transactionByIdHash() => r'74ebc4743b0ae9c8d398cb113e9190eaca3bdcf1';
+String _$transactionByIdHash() => r'31b4aa705eaf12f72d56d7c359eb3a39578d9bc0';
 
 final class TransactionByIdFamily extends $Family
-    with $FunctionalFamilyOverride<FutureOr<Transaction>, int> {
+    with $FunctionalFamilyOverride<FutureOr<Transaction>, String> {
   TransactionByIdFamily._()
     : super(
         retry: null,
@@ -166,7 +166,7 @@ final class TransactionByIdFamily extends $Family
         isAutoDispose: true,
       );
 
-  TransactionByIdProvider call(int id) =>
+  TransactionByIdProvider call(String id) =>
       TransactionByIdProvider._(argument: id, from: this);
 
   @override

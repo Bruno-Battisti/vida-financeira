@@ -9,7 +9,7 @@ import '../providers/goals_provider.dart';
 class GoalFormScreen extends ConsumerStatefulWidget {
   const GoalFormScreen({super.key, this.goalId});
 
-  final int? goalId;
+  final String? goalId;
 
   @override
   ConsumerState<GoalFormScreen> createState() => _GoalFormScreenState();

@@ -1,6 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../database/providers.dart';
+import '../../../core/providers/firebase_providers.dart';
 import '../models/transaction.dart';
 import '../repositories/transactions_repository.dart';
 
@@ -8,7 +8,11 @@ part 'transactions_provider.g.dart';
 
 @riverpod
 TransactionsRepository transactionsRepository(Ref ref) {
-  return TransactionsRepository(ref.watch(appDatabaseProvider));
+  final uid = ref.watch(authStateProvider).value?.uid;
+  if (uid == null) {
+    throw StateError('transactionsRepositoryProvider requer um usuário autenticado.');
+  }
+  return TransactionsRepository(ref.watch(firestoreProvider), uid);
 }
 
 @riverpod
@@ -17,7 +21,7 @@ Stream<List<Transaction>> transactions(Ref ref) {
 }
 
 @riverpod
-Future<Transaction> transactionById(Ref ref, int id) async {
+Future<Transaction> transactionById(Ref ref, String id) async {
   final transactions = await ref.watch(transactionsProvider.future);
   return transactions.firstWhere((t) => t.id == id);
 }

@@ -1,15 +1,13 @@
-import 'dart:async';
-
+import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
+import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:vida_financeira/app/app.dart';
 import 'package:vida_financeira/core/constants/category_icons.dart';
+import 'package:vida_financeira/core/providers/firebase_providers.dart';
 import 'package:vida_financeira/core/providers/shared_preferences_provider.dart';
-import 'package:vida_financeira/features/goals/models/goal.dart';
-import 'package:vida_financeira/features/goals/models/goal_progress.dart';
-import 'package:vida_financeira/features/goals/models/goal_transaction.dart';
 import 'package:vida_financeira/features/goals/providers/goals_provider.dart';
 import 'package:vida_financeira/features/goals/repositories/goals_repository.dart';
 import 'package:vida_financeira/features/transactions/models/category.dart';
@@ -19,28 +17,10 @@ import 'package:vida_financeira/features/transactions/providers/transactions_pro
 import 'package:vida_financeira/features/transactions/repositories/categories_repository.dart';
 import 'package:vida_financeira/features/transactions/repositories/transactions_repository.dart';
 
-/// Monta o app com repositorios fake e um SharedPreferences em memoria,
-/// pronto para `tester.pumpWidget()` nos testes de widget.
-Future<Widget> appWithFakeRepositories() async {
-  SharedPreferences.setMockInitialValues({});
-  final prefs = await SharedPreferences.getInstance();
+const _testUid = 'test-user';
 
-  return ProviderScope(
-    overrides: [
-      sharedPreferencesProvider.overrideWithValue(prefs),
-      transactionsRepositoryProvider.overrideWithValue(FakeTransactionsRepository()),
-      categoriesRepositoryProvider.overrideWithValue(FakeCategoriesRepository()),
-      goalsRepositoryProvider.overrideWithValue(FakeGoalsRepository()),
-    ],
-    child: const VidaFinanceiraApp(),
-  );
-}
-
-/// Repositórios em memória (sem Drift) usados só em testes de widget, para
-/// evitar o Timer que o cancelamento de query streams do Drift agenda no
-/// dispose — o `flutter_test` falha se esse Timer ainda estiver pendente
-/// quando a árvore de widgets é desmontada entre testes.
-
+/// Categorias continuam locais (Drift) na app real — aqui um fake simples
+/// em memória evita precisar de um banco de verdade só para o teste de UI.
 class FakeCategoriesRepository implements CategoriesRepository {
   final List<Category> _items = [
     Category(id: 1, name: 'Alimentação', icon: iconForKey('restaurant'), type: CategoryType.expense),
@@ -62,147 +42,64 @@ class FakeCategoriesRepository implements CategoriesRepository {
   Stream<List<Category>> watchAll() => Stream.value(List.unmodifiable(_items));
 }
 
-class FakeTransactionsRepository implements TransactionsRepository {
-  final List<Transaction> _items = [
-    Transaction(id: 1, description: 'Salário de Setembro', amount: 4500, type: TransactionType.income, categoryId: 10, date: DateTime(2026, 9, 5)),
-    Transaction(id: 2, description: 'Supermercado', amount: 320.50, type: TransactionType.expense, categoryId: 1, date: DateTime(2026, 9, 7)),
-    Transaction(id: 3, description: 'Corrida de aplicativo', amount: 45.90, type: TransactionType.expense, categoryId: 2, date: DateTime(2026, 9, 8)),
-    Transaction(id: 4, description: 'Aluguel', amount: 1200, type: TransactionType.expense, categoryId: 3, date: DateTime(2026, 9, 10)),
-    Transaction(id: 5, description: 'Cinema', amount: 60, type: TransactionType.expense, categoryId: 4, date: DateTime(2026, 9, 12)),
-    Transaction(id: 6, description: 'Projeto freelance', amount: 800, type: TransactionType.income, categoryId: 11, date: DateTime(2026, 9, 14)),
-    Transaction(id: 7, description: 'Assinatura streaming', amount: 39.90, type: TransactionType.expense, categoryId: 8, date: DateTime(2026, 9, 15)),
-    Transaction(id: 8, description: 'Farmácia', amount: 78.30, type: TransactionType.expense, categoryId: 6, date: DateTime(2026, 9, 16)),
-    Transaction(id: 9, description: 'Dividendos', amount: 150, type: TransactionType.income, categoryId: 12, date: DateTime(2026, 9, 17)),
-    Transaction(id: 10, description: 'Livro técnico', amount: 89.90, type: TransactionType.expense, categoryId: 7, date: DateTime(2026, 9, 18)),
-  ]..sort((a, b) => b.date.compareTo(a.date));
+Future<void> _seedTransactions(TransactionsRepository repo) async {
+  final seed = [
+    ('Salário de Setembro', 4500.0, TransactionType.income, 10, DateTime(2026, 9, 5)),
+    ('Supermercado', 320.50, TransactionType.expense, 1, DateTime(2026, 9, 7)),
+    ('Corrida de aplicativo', 45.90, TransactionType.expense, 2, DateTime(2026, 9, 8)),
+    ('Aluguel', 1200.0, TransactionType.expense, 3, DateTime(2026, 9, 10)),
+    ('Cinema', 60.0, TransactionType.expense, 4, DateTime(2026, 9, 12)),
+    ('Projeto freelance', 800.0, TransactionType.income, 11, DateTime(2026, 9, 14)),
+    ('Assinatura streaming', 39.90, TransactionType.expense, 8, DateTime(2026, 9, 15)),
+    ('Farmácia', 78.30, TransactionType.expense, 6, DateTime(2026, 9, 16)),
+    ('Dividendos', 150.0, TransactionType.income, 12, DateTime(2026, 9, 17)),
+    ('Livro técnico', 89.90, TransactionType.expense, 7, DateTime(2026, 9, 18)),
+  ];
 
-  final _controller = StreamController<List<Transaction>>.broadcast();
-  int _nextId = 11;
-
-  @override
-  Stream<List<Transaction>> watchAll() async* {
-    yield List.unmodifiable(_items);
-    yield* _controller.stream;
-  }
-
-  void _emit() {
-    _items.sort((a, b) => b.date.compareTo(a.date));
-    _controller.add(List.unmodifiable(_items));
-  }
-
-  @override
-  Future<void> add({
-    required String description,
-    required double amount,
-    required TransactionType type,
-    required int categoryId,
-    required DateTime date,
-    String? note,
-  }) async {
-    _items.add(Transaction(
-      id: _nextId++,
-      description: description,
-      amount: amount,
-      type: type,
-      categoryId: categoryId,
-      date: date,
-      note: note,
-    ));
-    _emit();
-  }
-
-  @override
-  Future<void> update(Transaction transaction) async {
-    final index = _items.indexWhere((t) => t.id == transaction.id);
-    if (index != -1) _items[index] = transaction;
-    _emit();
-  }
-
-  @override
-  Future<void> remove(int id) async {
-    _items.removeWhere((t) => t.id == id);
-    _emit();
+  for (final (description, amount, type, categoryId, date) in seed) {
+    await repo.add(description: description, amount: amount, type: type, categoryId: categoryId, date: date);
   }
 }
 
-class FakeGoalsRepository implements GoalsRepository {
-  final List<Goal> _goals = [
-    const Goal(id: 1, name: 'Viagem para o Nordeste', targetAmount: 5000),
-    const Goal(id: 2, name: 'Reserva de emergência', targetAmount: 10000),
-    const Goal(id: 3, name: 'Notebook novo', targetAmount: 4500),
+Future<void> _seedGoals(GoalsRepository repo) async {
+  final seed = [
+    ('Viagem para o Nordeste', 5000.0, 1800.0),
+    ('Reserva de emergência', 10000.0, 6200.0),
+    ('Notebook novo', 4500.0, 4500.0),
   ];
 
-  final List<GoalTransaction> _entries = [
-    GoalTransaction(id: 1, goalId: 1, amount: 1800, date: DateTime(2026, 8, 1)),
-    GoalTransaction(id: 2, goalId: 2, amount: 6200, date: DateTime(2026, 8, 1)),
-    GoalTransaction(id: 3, goalId: 3, amount: 4500, date: DateTime(2026, 8, 1)),
-  ];
-
-  final _changesController = StreamController<void>.broadcast();
-  int _nextGoalId = 4;
-  int _nextEntryId = 4;
-
-  void _notifyChanged() => _changesController.add(null);
-
-  double _currentAmount(int goalId) {
-    return _entries.where((e) => e.goalId == goalId).fold(0.0, (sum, e) => sum + e.amount);
+  for (final (name, target, current) in seed) {
+    await repo.addGoal(name: name, targetAmount: target);
+    final created = (await repo.watchAllWithProgress().first).firstWhere((g) => g.goal.name == name);
+    await repo.addContribution(goalId: created.goal.id, amount: current, date: DateTime(2026, 8, 1));
   }
+}
 
-  @override
-  Stream<List<GoalProgress>> watchAllWithProgress() async* {
-    Iterable<GoalProgress> build() => _goals.map((goal) {
-          final currentAmount = _currentAmount(goal.id);
-          return (
-            goal: goal,
-            currentAmount: currentAmount,
-            progress: computeGoalProgress(currentAmount, goal.targetAmount),
-          );
-        });
+/// Monta o app com dados de teste (Firestore fake + auth mockado, já
+/// logado) prontos para `tester.pumpWidget()` nos testes de widget.
+Future<Widget> appWithFakeRepositories() async {
+  SharedPreferences.setMockInitialValues({});
+  final prefs = await SharedPreferences.getInstance();
 
-    yield build().toList();
-    yield* _changesController.stream.map((_) => build().toList());
-  }
+  final firestore = FakeFirebaseFirestore();
+  final transactionsRepository = TransactionsRepository(firestore, _testUid);
+  final goalsRepository = GoalsRepository(firestore, _testUid);
+  await _seedTransactions(transactionsRepository);
+  await _seedGoals(goalsRepository);
 
-  @override
-  Stream<List<GoalTransaction>> watchEntries(int goalId) async* {
-    List<GoalTransaction> forGoal() =>
-        _entries.where((e) => e.goalId == goalId).toList()..sort((a, b) => b.date.compareTo(a.date));
+  final auth = MockFirebaseAuth(
+    mockUser: MockUser(uid: _testUid, email: 'teste@vidafinanceira.app'),
+    signedIn: true,
+  );
 
-    yield forGoal();
-    yield* _changesController.stream.map((_) => forGoal());
-  }
-
-  @override
-  Future<void> addGoal({
-    required String name,
-    required double targetAmount,
-    DateTime? deadline,
-  }) async {
-    _goals.add(Goal(id: _nextGoalId++, name: name, targetAmount: targetAmount, deadline: deadline));
-    _notifyChanged();
-  }
-
-  @override
-  Future<void> updateGoal(Goal goal) async {
-    final index = _goals.indexWhere((g) => g.id == goal.id);
-    if (index != -1) _goals[index] = goal;
-    _notifyChanged();
-  }
-
-  @override
-  Future<void> removeGoal(int id) async {
-    _goals.removeWhere((g) => g.id == id);
-    _entries.removeWhere((e) => e.goalId == id);
-    _notifyChanged();
-  }
-
-  @override
-  Future<void> addContribution({
-    required int goalId,
-    required double amount,
-    DateTime? date,
-  }) async {
-    _entries.add(GoalTransaction(id: _nextEntryId++, goalId: goalId, amount: amount, date: date ?? DateTime.now()));
-    _notifyChanged();
-  }
+  return ProviderScope(
+    overrides: [
+      sharedPreferencesProvider.overrideWithValue(prefs),
+      firebaseAuthProvider.overrideWithValue(auth),
+      transactionsRepositoryProvider.overrideWithValue(transactionsRepository),
+      goalsRepositoryProvider.overrideWithValue(goalsRepository),
+      categoriesRepositoryProvider.overrideWithValue(FakeCategoriesRepository()),
+    ],
+    child: const VidaFinanceiraApp(),
+  );
 }

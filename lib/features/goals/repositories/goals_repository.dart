@@ -1,57 +1,72 @@
-import 'package:drift/drift.dart';
+import 'dart:async';
 
-import '../../../database/database.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '../models/goal.dart';
 import '../models/goal_progress.dart';
 import '../models/goal_transaction.dart';
 
 class GoalsRepository {
-  GoalsRepository(this._db);
+  GoalsRepository(this._firestore, this._uid);
 
-  final AppDatabase _db;
+  final FirebaseFirestore _firestore;
+  final String _uid;
 
+  CollectionReference<Map<String, dynamic>> get _goalsCollection =>
+      _firestore.collection('users').doc(_uid).collection('goals');
+
+  CollectionReference<Map<String, dynamic>> get _entriesCollection =>
+      _firestore.collection('users').doc(_uid).collection('goalEntries');
+
+  /// Firestore não faz join/agregação como o Drift, então os dois streams
+  /// (metas e aportes) são combinados manualmente: cada um reemite a lista
+  /// combinada sempre que qualquer um dos dois mudar. O primeiro valor só
+  /// sai depois que AMBOS já entregaram seu snapshot inicial — do contrário
+  /// o primeiro a chegar emitiria com o outro ainda vazio (currentAmount 0).
   Stream<List<GoalProgress>> watchAllWithProgress() {
-    final totalContributed = _db.goalEntries.amount.sum();
+    late StreamController<List<GoalProgress>> controller;
+    var latestGoals = <Goal>[];
+    var latestEntries = <GoalTransaction>[];
+    var goalsReady = false;
+    var entriesReady = false;
+    StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? goalsSub;
+    StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? entriesSub;
 
-    final query = _db.selectOnly(_db.goals)
-      ..addColumns([
-        _db.goals.id,
-        _db.goals.name,
-        _db.goals.targetAmount,
-        _db.goals.deadline,
-        totalContributed,
-      ])
-      ..join([
-        leftOuterJoin(_db.goalEntries, _db.goalEntries.goalId.equalsExp(_db.goals.id)),
-      ])
-      ..groupBy([_db.goals.id]);
+    void emit() {
+      if (!goalsReady || !entriesReady) return;
+      if (!controller.isClosed) {
+        controller.add(_combine(latestGoals, latestEntries));
+      }
+    }
 
-    return query.watch().map((rows) {
-      final items = rows.map((row) {
-        final goal = Goal(
-          id: row.read(_db.goals.id)!,
-          name: row.read(_db.goals.name)!,
-          targetAmount: row.read(_db.goals.targetAmount)!,
-          deadline: row.read(_db.goals.deadline),
-        );
-        final currentAmount = row.read(totalContributed) ?? 0;
-        return (
-          goal: goal,
-          currentAmount: currentAmount,
-          progress: computeGoalProgress(currentAmount, goal.targetAmount),
-        );
-      }).toList();
+    controller = StreamController<List<GoalProgress>>.broadcast(
+      onListen: () {
+        goalsSub = _goalsCollection.snapshots().listen((snapshot) {
+          latestGoals = snapshot.docs.map(_goalFromDoc).toList();
+          goalsReady = true;
+          emit();
+        });
+        entriesSub = _entriesCollection.snapshots().listen((snapshot) {
+          latestEntries = snapshot.docs.map(_entryFromDoc).toList();
+          entriesReady = true;
+          emit();
+        });
+      },
+      onCancel: () {
+        goalsSub?.cancel();
+        entriesSub?.cancel();
+      },
+    );
 
-      items.sort((a, b) => a.goal.id.compareTo(b.goal.id));
-      return items;
-    });
+    return controller.stream;
   }
 
-  Stream<List<GoalTransaction>> watchEntries(int goalId) {
-    final query = _db.select(_db.goalEntries)
-      ..where((e) => e.goalId.equals(goalId))
-      ..orderBy([(e) => OrderingTerm.desc(e.date)]);
-    return query.watch().map((rows) => rows.map(_entryToDomain).toList());
+  Stream<List<GoalTransaction>> watchEntries(String goalId) {
+    return _entriesCollection.where('goalId', isEqualTo: goalId).snapshots().map((snapshot) {
+      final entries = snapshot.docs.map(_entryFromDoc).toList()
+        ..sort((a, b) => b.date.compareTo(a.date));
+      return entries;
+    });
   }
 
   Future<void> addGoal({
@@ -59,47 +74,75 @@ class GoalsRepository {
     required double targetAmount,
     DateTime? deadline,
   }) {
-    return _db.into(_db.goals).insert(
-          GoalsCompanion.insert(
-            name: name,
-            targetAmount: targetAmount,
-            deadline: Value(deadline),
-          ),
-        );
-  }
-
-  Future<void> updateGoal(Goal goal) {
-    return (_db.update(_db.goals)..where((g) => g.id.equals(goal.id))).write(
-      GoalsCompanion(
-        name: Value(goal.name),
-        targetAmount: Value(goal.targetAmount),
-        deadline: Value(goal.deadline),
-      ),
-    );
-  }
-
-  Future<void> removeGoal(int id) {
-    return _db.transaction(() async {
-      await (_db.delete(_db.goalEntries)..where((e) => e.goalId.equals(id))).go();
-      await (_db.delete(_db.goals)..where((g) => g.id.equals(id))).go();
+    return _goalsCollection.add({
+      'name': name,
+      'targetAmount': targetAmount,
+      'deadline': deadline == null ? null : Timestamp.fromDate(deadline),
     });
   }
 
+  Future<void> updateGoal(Goal goal) {
+    return _goalsCollection.doc(goal.id).update({
+      'name': goal.name,
+      'targetAmount': goal.targetAmount,
+      'deadline': goal.deadline == null ? null : Timestamp.fromDate(goal.deadline!),
+    });
+  }
+
+  Future<void> removeGoal(String id) async {
+    final batch = _firestore.batch();
+    final entriesSnapshot = await _entriesCollection.where('goalId', isEqualTo: id).get();
+    for (final doc in entriesSnapshot.docs) {
+      batch.delete(doc.reference);
+    }
+    batch.delete(_goalsCollection.doc(id));
+    await batch.commit();
+  }
+
   Future<void> addContribution({
-    required int goalId,
+    required String goalId,
     required double amount,
     DateTime? date,
   }) {
-    return _db.into(_db.goalEntries).insert(
-          GoalEntriesCompanion.insert(
-            goalId: goalId,
-            amount: amount,
-            date: date ?? DateTime.now(),
-          ),
-        );
+    return _entriesCollection.add({
+      'goalId': goalId,
+      'amount': amount,
+      'date': Timestamp.fromDate(date ?? DateTime.now()),
+    });
   }
 
-  GoalTransaction _entryToDomain(GoalEntryRow row) {
-    return GoalTransaction(id: row.id, goalId: row.goalId, amount: row.amount, date: row.date);
+  List<GoalProgress> _combine(List<Goal> goals, List<GoalTransaction> entries) {
+    final items = goals.map((goal) {
+      final currentAmount = entries
+          .where((e) => e.goalId == goal.id)
+          .fold(0.0, (total, e) => total + e.amount);
+      return (
+        goal: goal,
+        currentAmount: currentAmount,
+        progress: computeGoalProgress(currentAmount, goal.targetAmount),
+      );
+    }).toList();
+    items.sort((a, b) => a.goal.id.compareTo(b.goal.id));
+    return items;
+  }
+
+  Goal _goalFromDoc(QueryDocumentSnapshot<Map<String, dynamic>> doc) {
+    final data = doc.data();
+    return Goal(
+      id: doc.id,
+      name: data['name'] as String,
+      targetAmount: (data['targetAmount'] as num).toDouble(),
+      deadline: (data['deadline'] as Timestamp?)?.toDate(),
+    );
+  }
+
+  GoalTransaction _entryFromDoc(QueryDocumentSnapshot<Map<String, dynamic>> doc) {
+    final data = doc.data();
+    return GoalTransaction(
+      id: doc.id,
+      goalId: data['goalId'] as String,
+      amount: (data['amount'] as num).toDouble(),
+      date: (data['date'] as Timestamp).toDate(),
+    );
   }
 }

@@ -9,7 +9,7 @@ import '../widgets/contribution_dialog.dart';
 class GoalDetailScreen extends ConsumerWidget {
   const GoalDetailScreen({super.key, required this.goalId});
 
-  final int goalId;
+  final String goalId;
 
   Future<void> _contribute(BuildContext context, WidgetRef ref, {required bool isWithdrawal}) async {
     final amount = await showDialog<double>(

@@ -7,7 +7,7 @@ enum TransactionType { income, expense }
 @freezed
 abstract class Transaction with _$Transaction {
   const factory Transaction({
-    required int id,
+    required String id,
     required String description,
     required double amount,
     required TransactionType type,

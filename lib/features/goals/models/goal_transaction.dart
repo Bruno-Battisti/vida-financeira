@@ -6,8 +6,8 @@ part 'goal_transaction.freezed.dart';
 @freezed
 abstract class GoalTransaction with _$GoalTransaction {
   const factory GoalTransaction({
-    required int id,
-    required int goalId,
+    required String id,
+    required String goalId,
     required double amount,
     required DateTime date,
   }) = _GoalTransaction;

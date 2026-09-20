@@ -45,6 +45,9 @@ dependencies:
   intl: ^0.20.3
   fl_chart: ^1.2.0
   shared_preferences: ^2.5.5
+  firebase_core: ^4.15.0
+  firebase_auth: ^6.7.0
+  cloud_firestore: ^6.10.0
 
 dev_dependencies:
   flutter_test:
@@ -60,6 +63,8 @@ dev_dependencies:
   riverpod_generator: ^4.0.9
   freezed: ^4.0.2
   drift_dev: ^2.35.0
+  fake_cloud_firestore: ^4.3.0
+  firebase_auth_mocks: ^0.15.2
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

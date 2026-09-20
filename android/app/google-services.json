@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "391963437425",
+    "project_id": "vida-financeira-app",
+    "storage_bucket": "vida-financeira-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:391963437425:android:b6e52a383f475d8a402ed0",
+        "android_client_info": {
+          "package_name": "com.vidafinanceira.vida_financeira"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBkOTBvdqF0IvwDjux9FJERctodVQSAonY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

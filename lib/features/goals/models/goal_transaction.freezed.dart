@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$GoalTransaction {
 
- int get id; int get goalId; double get amount; DateTime get date;
+ String get id; String get goalId; double get amount; DateTime get date;
 /// Create a copy of GoalTransaction
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -51,7 +51,7 @@ abstract mixin class $GoalTransactionCopyWith<$Res>  {
   factory $GoalTransactionCopyWith(GoalTransaction value, $Res Function(GoalTransaction) _then) = _$GoalTransactionCopyWithImpl;
 @useResult
 $Res call({
- int id, int goalId, double amount, DateTime date
+ String id, String goalId, double amount, DateTime date
 });
 
 
@@ -71,8 +71,8 @@ class _$GoalTransactionCopyWithImpl<$Res>
 @pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? goalId = null,Object? amount = null,Object? date = null,}) {
   return _then(GoalTransaction(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
-as int,goalId: null == goalId ? _self.goalId : goalId // ignore: cast_nullable_to_non_nullable
-as int,amount: null == amount ? _self.amount : amount // ignore: cast_nullable_to_non_nullable
+as String,goalId: null == goalId ? _self.goalId : goalId // ignore: cast_nullable_to_non_nullable
+as String,amount: null == amount ? _self.amount : amount // ignore: cast_nullable_to_non_nullable
 as double,date: null == date ? _self.date : date // ignore: cast_nullable_to_non_nullable
 as DateTime,
   ));
@@ -159,7 +159,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  int goalId,  double amount,  DateTime date)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String goalId,  double amount,  DateTime date)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _GoalTransaction() when $default != null:
 return $default(_that.id,_that.goalId,_that.amount,_that.date);case _:
@@ -180,7 +180,7 @@ return $default(_that.id,_that.goalId,_that.amount,_that.date);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  int goalId,  double amount,  DateTime date)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String goalId,  double amount,  DateTime date)  $default,) {final _that = this;
 switch (_that) {
 case _GoalTransaction():
 return $default(_that.id,_that.goalId,_that.amount,_that.date);case _:
@@ -200,7 +200,7 @@ return $default(_that.id,_that.goalId,_that.amount,_that.date);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  int goalId,  double amount,  DateTime date)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String goalId,  double amount,  DateTime date)?  $default,) {final _that = this;
 switch (_that) {
 case _GoalTransaction() when $default != null:
 return $default(_that.id,_that.goalId,_that.amount,_that.date);case _:
@@ -218,8 +218,8 @@ class _GoalTransaction implements GoalTransaction {
   const _GoalTransaction({required this.id, required this.goalId, required this.amount, required this.date});
   
 
-@override final  int id;
-@override final  int goalId;
+@override final  String id;
+@override final  String goalId;
 @override final  double amount;
 @override final  DateTime date;
 
@@ -255,7 +255,7 @@ abstract mixin class _$GoalTransactionCopyWith<$Res> implements $GoalTransaction
   factory _$GoalTransactionCopyWith(_GoalTransaction value, $Res Function(_GoalTransaction) _then) = __$GoalTransactionCopyWithImpl;
 @override @useResult
 $Res call({
- int id, int goalId, double amount, DateTime date
+ String id, String goalId, double amount, DateTime date
 });
 
 
@@ -275,8 +275,8 @@ class __$GoalTransactionCopyWithImpl<$Res>
 @override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? goalId = null,Object? amount = null,Object? date = null,}) {
   return _then(_GoalTransaction(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
-as int,goalId: null == goalId ? _self.goalId : goalId // ignore: cast_nullable_to_non_nullable
-as int,amount: null == amount ? _self.amount : amount // ignore: cast_nullable_to_non_nullable
+as String,goalId: null == goalId ? _self.goalId : goalId // ignore: cast_nullable_to_non_nullable
+as String,amount: null == amount ? _self.amount : amount // ignore: cast_nullable_to_non_nullable
 as double,date: null == date ? _self.date : date // ignore: cast_nullable_to_non_nullable
 as DateTime,
   ));

@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Transaction {
 
- int get id; String get description; double get amount; TransactionType get type; int get categoryId; DateTime get date; String? get note;
+ String get id; String get description; double get amount; TransactionType get type; int get categoryId; DateTime get date; String? get note;
 /// Create a copy of Transaction
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -51,7 +51,7 @@ abstract mixin class $TransactionCopyWith<$Res>  {
   factory $TransactionCopyWith(Transaction value, $Res Function(Transaction) _then) = _$TransactionCopyWithImpl;
 @useResult
 $Res call({
- int id, String description, double amount, TransactionType type, int categoryId, DateTime date, String? note
+ String id, String description, double amount, TransactionType type, int categoryId, DateTime date, String? note
 });
 
 
@@ -71,7 +71,7 @@ class _$TransactionCopyWithImpl<$Res>
 @pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? description = null,Object? amount = null,Object? type = null,Object? categoryId = null,Object? date = null,Object? note = freezed,}) {
   return _then(Transaction(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
-as int,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
+as String,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String,amount: null == amount ? _self.amount : amount // ignore: cast_nullable_to_non_nullable
 as double,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
 as TransactionType,categoryId: null == categoryId ? _self.categoryId : categoryId // ignore: cast_nullable_to_non_nullable
@@ -162,7 +162,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String description,  double amount,  TransactionType type,  int categoryId,  DateTime date,  String? note)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String description,  double amount,  TransactionType type,  int categoryId,  DateTime date,  String? note)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Transaction() when $default != null:
 return $default(_that.id,_that.description,_that.amount,_that.type,_that.categoryId,_that.date,_that.note);case _:
@@ -183,7 +183,7 @@ return $default(_that.id,_that.description,_that.amount,_that.type,_that.categor
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String description,  double amount,  TransactionType type,  int categoryId,  DateTime date,  String? note)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String description,  double amount,  TransactionType type,  int categoryId,  DateTime date,  String? note)  $default,) {final _that = this;
 switch (_that) {
 case _Transaction():
 return $default(_that.id,_that.description,_that.amount,_that.type,_that.categoryId,_that.date,_that.note);case _:
@@ -203,7 +203,7 @@ return $default(_that.id,_that.description,_that.amount,_that.type,_that.categor
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String description,  double amount,  TransactionType type,  int categoryId,  DateTime date,  String? note)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String description,  double amount,  TransactionType type,  int categoryId,  DateTime date,  String? note)?  $default,) {final _that = this;
 switch (_that) {
 case _Transaction() when $default != null:
 return $default(_that.id,_that.description,_that.amount,_that.type,_that.categoryId,_that.date,_that.note);case _:
@@ -221,7 +221,7 @@ class _Transaction implements Transaction {
   const _Transaction({required this.id, required this.description, required this.amount, required this.type, required this.categoryId, required this.date, this.note});
   
 
-@override final  int id;
+@override final  String id;
 @override final  String description;
 @override final  double amount;
 @override final  TransactionType type;
@@ -261,7 +261,7 @@ abstract mixin class _$TransactionCopyWith<$Res> implements $TransactionCopyWith
   factory _$TransactionCopyWith(_Transaction value, $Res Function(_Transaction) _then) = __$TransactionCopyWithImpl;
 @override @useResult
 $Res call({
- int id, String description, double amount, TransactionType type, int categoryId, DateTime date, String? note
+ String id, String description, double amount, TransactionType type, int categoryId, DateTime date, String? note
 });
 
 
@@ -281,7 +281,7 @@ class __$TransactionCopyWithImpl<$Res>
 @override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? description = null,Object? amount = null,Object? type = null,Object? categoryId = null,Object? date = null,Object? note = freezed,}) {
   return _then(_Transaction(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
-as int,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
+as String,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String,amount: null == amount ? _self.amount : amount // ignore: cast_nullable_to_non_nullable
 as double,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
 as TransactionType,categoryId: null == categoryId ? _self.categoryId : categoryId // ignore: cast_nullable_to_non_nullable

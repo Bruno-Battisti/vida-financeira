@@ -10,7 +10,7 @@ import '../providers/transactions_provider.dart';
 class TransactionDetailScreen extends ConsumerWidget {
   const TransactionDetailScreen({super.key, required this.transactionId});
 
-  final int transactionId;
+  final String transactionId;
 
   Future<void> _confirmDelete(BuildContext context, WidgetRef ref) async {
     final confirmed = await showDialog<bool>(

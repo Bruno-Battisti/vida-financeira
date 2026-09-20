@@ -1,17 +1,20 @@
-import 'package:drift/drift.dart';
+import 'package:cloud_firestore/cloud_firestore.dart' hide Transaction;
 
-import '../../../database/database.dart';
 import '../models/transaction.dart';
 
 class TransactionsRepository {
-  TransactionsRepository(this._db);
+  TransactionsRepository(this._firestore, this._uid);
 
-  final AppDatabase _db;
+  final FirebaseFirestore _firestore;
+  final String _uid;
+
+  CollectionReference<Map<String, dynamic>> get _collection =>
+      _firestore.collection('users').doc(_uid).collection('transactions');
 
   Stream<List<Transaction>> watchAll() {
-    final query = _db.select(_db.transactionEntries)
-      ..orderBy([(t) => OrderingTerm.desc(t.date)]);
-    return query.watch().map((rows) => rows.map(_toDomain).toList());
+    return _collection.orderBy('date', descending: true).snapshots().map(
+          (snapshot) => snapshot.docs.map(_fromDoc).toList(),
+        );
   }
 
   Future<void> add({
@@ -22,47 +25,41 @@ class TransactionsRepository {
     required DateTime date,
     String? note,
   }) {
-    return _db.into(_db.transactionEntries).insert(
-          TransactionEntriesCompanion.insert(
-            description: description,
-            amount: amount,
-            type: type.name,
-            categoryId: categoryId,
-            date: date,
-            note: Value(note),
-          ),
-        );
+    return _collection.add({
+      'description': description,
+      'amount': amount,
+      'type': type.name,
+      'categoryId': categoryId,
+      'date': Timestamp.fromDate(date),
+      'note': note,
+    });
   }
 
   Future<void> update(Transaction transaction) {
-    return (_db.update(_db.transactionEntries)..where((t) => t.id.equals(transaction.id)))
-        .write(_toCompanion(transaction));
+    return _collection.doc(transaction.id).update({
+      'description': transaction.description,
+      'amount': transaction.amount,
+      'type': transaction.type.name,
+      'categoryId': transaction.categoryId,
+      'date': Timestamp.fromDate(transaction.date),
+      'note': transaction.note,
+    });
   }
 
-  Future<void> remove(int id) {
-    return (_db.delete(_db.transactionEntries)..where((t) => t.id.equals(id))).go();
+  Future<void> remove(String id) {
+    return _collection.doc(id).delete();
   }
 
-  Transaction _toDomain(TransactionRow row) {
+  Transaction _fromDoc(QueryDocumentSnapshot<Map<String, dynamic>> doc) {
+    final data = doc.data();
     return Transaction(
-      id: row.id,
-      description: row.description,
-      amount: row.amount,
-      type: row.type == 'income' ? TransactionType.income : TransactionType.expense,
-      categoryId: row.categoryId,
-      date: row.date,
-      note: row.note,
-    );
-  }
-
-  TransactionEntriesCompanion _toCompanion(Transaction transaction) {
-    return TransactionEntriesCompanion(
-      description: Value(transaction.description),
-      amount: Value(transaction.amount),
-      type: Value(transaction.type.name),
-      categoryId: Value(transaction.categoryId),
-      date: Value(transaction.date),
-      note: Value(transaction.note),
+      id: doc.id,
+      description: data['description'] as String,
+      amount: (data['amount'] as num).toDouble(),
+      type: data['type'] == 'income' ? TransactionType.income : TransactionType.expense,
+      categoryId: data['categoryId'] as int,
+      date: (data['date'] as Timestamp).toDate(),
+      note: data['note'] as String?,
     );
   }
 }
