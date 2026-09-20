@@ -14,6 +14,20 @@ import 'main_shell.dart';
 
 final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
 
+/// Telas empilhadas por cima da shell (formulários, detalhes, configurações)
+/// entram com um leve fade + slide, em vez do corte seco padrão.
+CustomTransitionPage<void> _slideFadePage(GoRouterState state, Widget child) {
+  return CustomTransitionPage<void>(
+    key: state.pageKey,
+    child: child,
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      final fade = CurvedAnimation(parent: animation, curve: Curves.easeOut);
+      final slide = Tween<Offset>(begin: const Offset(0, 0.04), end: Offset.zero).animate(fade);
+      return FadeTransition(opacity: fade, child: SlideTransition(position: slide, child: child));
+    },
+  );
+}
+
 GoRouter createRouter() => GoRouter(
   navigatorKey: rootNavigatorKey,
   initialLocation: '/',
@@ -40,14 +54,14 @@ GoRouter createRouter() => GoRouter(
                 GoRoute(
                   path: 'new',
                   parentNavigatorKey: rootNavigatorKey,
-                  builder: (context, state) => const TransactionFormScreen(),
+                  pageBuilder: (context, state) => _slideFadePage(state, const TransactionFormScreen()),
                 ),
                 GoRoute(
                   path: ':id',
                   parentNavigatorKey: rootNavigatorKey,
-                  builder: (context, state) {
+                  pageBuilder: (context, state) {
                     final id = int.parse(state.pathParameters['id']!);
-                    return TransactionDetailScreen(transactionId: id);
+                    return _slideFadePage(state, TransactionDetailScreen(transactionId: id));
                   },
                 ),
               ],
@@ -63,22 +77,22 @@ GoRouter createRouter() => GoRouter(
                 GoRoute(
                   path: 'new',
                   parentNavigatorKey: rootNavigatorKey,
-                  builder: (context, state) => const GoalFormScreen(),
+                  pageBuilder: (context, state) => _slideFadePage(state, const GoalFormScreen()),
                 ),
                 GoRoute(
                   path: ':id',
                   parentNavigatorKey: rootNavigatorKey,
-                  builder: (context, state) {
+                  pageBuilder: (context, state) {
                     final id = int.parse(state.pathParameters['id']!);
-                    return GoalDetailScreen(goalId: id);
+                    return _slideFadePage(state, GoalDetailScreen(goalId: id));
                   },
                   routes: [
                     GoRoute(
                       path: 'edit',
                       parentNavigatorKey: rootNavigatorKey,
-                      builder: (context, state) {
+                      pageBuilder: (context, state) {
                         final id = int.parse(state.pathParameters['id']!);
-                        return GoalFormScreen(goalId: id);
+                        return _slideFadePage(state, GoalFormScreen(goalId: id));
                       },
                     ),
                   ],
@@ -100,7 +114,7 @@ GoRouter createRouter() => GoRouter(
     GoRoute(
       path: '/settings',
       parentNavigatorKey: rootNavigatorKey,
-      builder: (context, state) => const SettingsScreen(),
+      pageBuilder: (context, state) => _slideFadePage(state, const SettingsScreen()),
     ),
   ],
 );

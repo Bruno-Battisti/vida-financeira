@@ -1,14 +1,40 @@
 import 'dart:async';
 
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'package:vida_financeira/app/app.dart';
 import 'package:vida_financeira/core/constants/category_icons.dart';
+import 'package:vida_financeira/core/providers/shared_preferences_provider.dart';
 import 'package:vida_financeira/features/goals/models/goal.dart';
 import 'package:vida_financeira/features/goals/models/goal_progress.dart';
 import 'package:vida_financeira/features/goals/models/goal_transaction.dart';
+import 'package:vida_financeira/features/goals/providers/goals_provider.dart';
 import 'package:vida_financeira/features/goals/repositories/goals_repository.dart';
 import 'package:vida_financeira/features/transactions/models/category.dart';
 import 'package:vida_financeira/features/transactions/models/transaction.dart';
+import 'package:vida_financeira/features/transactions/providers/categories_provider.dart';
+import 'package:vida_financeira/features/transactions/providers/transactions_provider.dart';
 import 'package:vida_financeira/features/transactions/repositories/categories_repository.dart';
 import 'package:vida_financeira/features/transactions/repositories/transactions_repository.dart';
+
+/// Monta o app com repositorios fake e um SharedPreferences em memoria,
+/// pronto para `tester.pumpWidget()` nos testes de widget.
+Future<Widget> appWithFakeRepositories() async {
+  SharedPreferences.setMockInitialValues({});
+  final prefs = await SharedPreferences.getInstance();
+
+  return ProviderScope(
+    overrides: [
+      sharedPreferencesProvider.overrideWithValue(prefs),
+      transactionsRepositoryProvider.overrideWithValue(FakeTransactionsRepository()),
+      categoriesRepositoryProvider.overrideWithValue(FakeCategoriesRepository()),
+      goalsRepositoryProvider.overrideWithValue(FakeGoalsRepository()),
+    ],
+    child: const VidaFinanceiraApp(),
+  );
+}
 
 /// Repositórios em memória (sem Drift) usados só em testes de widget, para
 /// evitar o Timer que o cancelamento de query streams do Drift agenda no

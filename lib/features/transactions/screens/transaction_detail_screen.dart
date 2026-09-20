@@ -25,10 +25,18 @@ class TransactionDetailScreen extends ConsumerWidget {
       ),
     );
 
-    if (confirmed == true) {
+    if (confirmed != true) return;
+
+    try {
       await ref.read(transactionsRepositoryProvider).remove(transactionId);
       if (context.mounted) {
         context.pop();
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Não foi possível excluir: $e')),
+        );
       }
     }
   }
@@ -68,9 +76,12 @@ class TransactionDetailScreen extends ConsumerWidget {
                 padding: const EdgeInsets.all(20),
                 children: [
                   Center(
-                    child: CircleAvatar(
-                      radius: 32,
-                      child: Icon(category.icon, size: 32),
+                    child: Hero(
+                      tag: 'transaction-avatar-${transaction.id}',
+                      child: CircleAvatar(
+                        radius: 32,
+                        child: Icon(category.icon, size: 32),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 16),

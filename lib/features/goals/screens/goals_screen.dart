@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/utils/formatters.dart';
+import '../../../core/widgets/empty_state.dart';
 import '../models/goal_progress.dart';
 import '../providers/goals_provider.dart';
 
@@ -19,7 +20,11 @@ class GoalsScreen extends ConsumerWidget {
         error: (error, _) => Center(child: Text('Erro: $error')),
         data: (goals) {
           if (goals.isEmpty) {
-            return const Center(child: Text('Nenhuma meta cadastrada.'));
+            return const EmptyState(
+              icon: Icons.flag_outlined,
+              title: 'Nenhuma meta cadastrada',
+              subtitle: 'Toque no botão + para criar sua primeira meta.',
+            );
           }
 
           return ListView.builder(
@@ -65,7 +70,13 @@ class _GoalCard extends StatelessWidget {
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                   ),
-                  Text(percentText, style: const TextStyle(fontWeight: FontWeight.bold)),
+                  Hero(
+                    tag: 'goal-progress-${goal.id}',
+                    child: Material(
+                      type: MaterialType.transparency,
+                      child: Text(percentText, style: const TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 12),

@@ -16,8 +16,21 @@ class GoalDetailScreen extends ConsumerWidget {
       context: context,
       builder: (context) => ContributionDialog(isWithdrawal: isWithdrawal),
     );
-    if (amount != null) {
+    if (amount == null) return;
+
+    try {
       await ref.read(goalsRepositoryProvider).addContribution(goalId: goalId, amount: amount);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(isWithdrawal ? 'Retirada registrada.' : 'Aporte adicionado.')),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Não foi possível registrar: $e')),
+        );
+      }
     }
   }
 
@@ -34,10 +47,18 @@ class GoalDetailScreen extends ConsumerWidget {
       ),
     );
 
-    if (confirmed == true) {
+    if (confirmed != true) return;
+
+    try {
       await ref.read(goalsRepositoryProvider).removeGoal(goalId);
       if (context.mounted) {
         context.pop();
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Não foi possível excluir: $e')),
+        );
       }
     }
   }
@@ -74,9 +95,15 @@ class GoalDetailScreen extends ConsumerWidget {
             padding: const EdgeInsets.all(20),
             children: [
               Center(
-                child: Text(
-                  percentText,
-                  style: const TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
+                child: Hero(
+                  tag: 'goal-progress-${goal.id}',
+                  child: Material(
+                    type: MaterialType.transparency,
+                    child: Text(
+                      percentText,
+                      style: const TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(height: 12),

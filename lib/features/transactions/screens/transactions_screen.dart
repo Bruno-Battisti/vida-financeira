@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/utils/formatters.dart';
+import '../../../core/widgets/empty_state.dart';
 import '../models/category.dart';
 import '../models/transaction.dart';
 import '../providers/categories_provider.dart';
@@ -89,7 +90,11 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
     Map<int, Category> categoryMap,
   ) {
     if (transactions.isEmpty) {
-      return const Center(child: Text('Nenhuma transação encontrada.'));
+      return const EmptyState(
+        icon: Icons.receipt_long_outlined,
+        title: 'Nenhuma transação encontrada',
+        subtitle: 'Toque no botão + para cadastrar a primeira.',
+      );
     }
 
     return ListView.builder(
@@ -103,7 +108,10 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
         return Card(
           margin: const EdgeInsets.only(bottom: 8),
           child: ListTile(
-            leading: CircleAvatar(child: Icon(category?.icon ?? Icons.category)),
+            leading: Hero(
+              tag: 'transaction-avatar-${transaction.id}',
+              child: CircleAvatar(child: Icon(category?.icon ?? Icons.category)),
+            ),
             title: Text(transaction.description),
             subtitle: Text('${category?.name ?? 'Categoria'} · ${formatDate(transaction.date)}'),
             trailing: Text(

@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class SettingsScreen extends StatelessWidget {
+import '../../../app/theme_mode_provider.dart';
+
+class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeModeProvider);
+
     return Scaffold(
       appBar: AppBar(title: const Text('Configurações')),
       body: ListView(
@@ -12,9 +17,9 @@ class SettingsScreen extends StatelessWidget {
           const _SectionLabel('Aparência'),
           ListTile(
             leading: const Icon(Icons.dark_mode_outlined),
-            title: const Text('Tema claro e escuro'),
-            subtitle: const Text('Disponível na Fase 9'),
-            onTap: () => _showComingSoon(context),
+            title: const Text('Tema'),
+            subtitle: Text(_themeModeLabel(themeMode)),
+            onTap: () => _showThemeDialog(context, ref, themeMode),
           ),
           const Divider(),
           const _SectionLabel('Preferências'),
@@ -54,6 +59,45 @@ class SettingsScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  String _themeModeLabel(ThemeMode mode) {
+    switch (mode) {
+      case ThemeMode.system:
+        return 'Padrão do sistema';
+      case ThemeMode.light:
+        return 'Claro';
+      case ThemeMode.dark:
+        return 'Escuro';
+    }
+  }
+
+  Future<void> _showThemeDialog(BuildContext context, WidgetRef ref, ThemeMode current) async {
+    final selected = await showDialog<ThemeMode>(
+      context: context,
+      builder: (context) => SimpleDialog(
+        title: const Text('Tema'),
+        children: [
+          RadioGroup<ThemeMode>(
+            groupValue: current,
+            onChanged: (value) => Navigator.of(context).pop(value),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: ThemeMode.values.map((mode) {
+                return RadioListTile<ThemeMode>(
+                  title: Text(_themeModeLabel(mode)),
+                  value: mode,
+                );
+              }).toList(),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (selected != null) {
+      await ref.read(themeModeProvider.notifier).setThemeMode(selected);
+    }
   }
 
   void _showComingSoon(BuildContext context) {
