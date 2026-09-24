@@ -10,6 +10,7 @@ import '../../../core/widgets/responsive_center.dart';
 import '../../transactions/providers/categories_provider.dart';
 import '../../transactions/providers/transactions_provider.dart';
 import '../../transactions/services/transaction_csv_exporter.dart';
+import '../../transactions/services/transaction_pdf_exporter.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -65,6 +66,13 @@ class SettingsScreen extends ConsumerWidget {
               title: const Text('Exportar dados'),
               subtitle: const Text('Baixa suas transações em um arquivo CSV'),
               onTap: () => _exportData(context, ref),
+            ),
+            ListTile(
+              leading: const Icon(Icons.picture_as_pdf_outlined),
+              title: const Text('Exportar PDF'),
+              subtitle:
+                  const Text('Gera um relatório em PDF das suas transações'),
+              onTap: () => _exportPdf(context, ref),
             ),
             ListTile(
               leading: const Icon(Icons.download_outlined),
@@ -148,6 +156,42 @@ class SettingsScreen extends ConsumerWidget {
         ShareParams(
           files: [
             XFile.fromData(bytes, name: 'transacoes.csv', mimeType: 'text/csv')
+          ],
+          subject: 'Transações — Vida Financeira',
+        ),
+      );
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Não foi possível exportar: $e')),
+        );
+      }
+    }
+  }
+
+  Future<void> _exportPdf(BuildContext context, WidgetRef ref) async {
+    try {
+      final transactions = await ref.read(transactionsProvider.future);
+      final categories = await ref.read(categoriesProvider.future);
+      final categoryMap = {for (final c in categories) c.id: c};
+
+      if (transactions.isEmpty) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content: Text('Nenhuma transação para exportar ainda.')),
+          );
+        }
+        return;
+      }
+
+      final bytes = await TransactionPdfExporter.build(transactions, categoryMap);
+
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [
+            XFile.fromData(bytes,
+                name: 'transacoes.pdf', mimeType: 'application/pdf')
           ],
           subject: 'Transações — Vida Financeira',
         ),
