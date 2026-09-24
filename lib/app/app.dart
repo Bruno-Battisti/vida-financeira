@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../features/security/providers/app_lock_provider.dart';
 import 'routes.dart';
 import 'theme.dart';
 import 'theme_mode_provider.dart';
@@ -13,13 +14,28 @@ class VidaFinanceiraApp extends ConsumerStatefulWidget {
   ConsumerState<VidaFinanceiraApp> createState() => _VidaFinanceiraAppState();
 }
 
-class _VidaFinanceiraAppState extends ConsumerState<VidaFinanceiraApp> {
+class _VidaFinanceiraAppState extends ConsumerState<VidaFinanceiraApp>
+    with WidgetsBindingObserver {
   late final GoRouter _router;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _router = createRouter(ref);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused) {
+      ref.read(appLockProvider.notifier).lock();
+    }
   }
 
   @override

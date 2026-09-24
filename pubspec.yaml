@@ -53,6 +53,8 @@ dependencies:
   share_plus: ^13.3.0
   pdf: ^3.13.1
   file_picker: ^13.1.0
+  local_auth: ^3.0.2
+  flutter_secure_storage: ^11.2.0
 
 dev_dependencies:
   flutter_test:

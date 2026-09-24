@@ -4,11 +4,13 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:local_auth/local_auth.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../app/theme_mode_provider.dart';
 import '../../../core/providers/firebase_providers.dart';
 import '../../../core/widgets/responsive_center.dart';
+import '../../security/providers/app_lock_provider.dart';
 import '../../transactions/providers/categories_provider.dart';
 import '../../transactions/providers/transactions_provider.dart';
 import '../../transactions/services/transaction_csv_exporter.dart';
@@ -22,6 +24,7 @@ class SettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(themeModeProvider);
     final user = ref.watch(firebaseAuthProvider).currentUser;
+    final lockState = ref.watch(appLockProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Configurações')),
@@ -48,6 +51,34 @@ class SettingsScreen extends ConsumerWidget {
               subtitle: Text(_themeModeLabel(themeMode)),
               onTap: () => _showThemeDialog(context, ref, themeMode),
             ),
+            const Divider(),
+            const _SectionLabel('Segurança'),
+            SwitchListTile(
+              secondary: const Icon(Icons.lock_outline),
+              title: const Text('Bloqueio por PIN'),
+              subtitle: const Text('Exige um PIN ao reabrir o app'),
+              value: lockState.pinEnabled,
+              onChanged: (value) => value
+                  ? _setupPinFlow(context, ref)
+                  : ref.read(appLockProvider.notifier).disablePin(),
+            ),
+            if (lockState.pinEnabled)
+              FutureBuilder<bool>(
+                future: LocalAuthentication().canCheckBiometrics,
+                builder: (context, snapshot) {
+                  if (snapshot.data != true) return const SizedBox.shrink();
+                  return SwitchListTile(
+                    secondary: const Icon(Icons.fingerprint),
+                    title: const Text('Desbloqueio por biometria'),
+                    subtitle: const Text(
+                        'Usa digital ou reconhecimento facial do aparelho'),
+                    value: lockState.biometricsEnabled,
+                    onChanged: (value) => ref
+                        .read(appLockProvider.notifier)
+                        .setBiometricsEnabled(value),
+                  );
+                },
+              ),
             const Divider(),
             const _SectionLabel('Preferências'),
             ListTile(
@@ -231,6 +262,71 @@ class SettingsScreen extends ConsumerWidget {
         );
       }
     }
+  }
+
+  Future<void> _setupPinFlow(BuildContext context, WidgetRef ref) async {
+    final pinController = TextEditingController();
+    final confirmController = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Definir PIN'),
+        content: Form(
+          key: formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                controller: pinController,
+                decoration: const InputDecoration(labelText: 'PIN (4 a 6 dígitos)'),
+                keyboardType: TextInputType.number,
+                obscureText: true,
+                validator: (value) {
+                  if (value == null || !RegExp(r'^\d{4,6}$').hasMatch(value)) {
+                    return 'Informe de 4 a 6 dígitos.';
+                  }
+                  return null;
+                },
+              ),
+              TextFormField(
+                controller: confirmController,
+                decoration: const InputDecoration(labelText: 'Confirme o PIN'),
+                keyboardType: TextInputType.number,
+                obscureText: true,
+                validator: (value) {
+                  if (value != pinController.text) {
+                    return 'Os PINs não coincidem.';
+                  }
+                  return null;
+                },
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            onPressed: () {
+              if (formKey.currentState!.validate()) {
+                Navigator.of(context).pop(true);
+              }
+            },
+            child: const Text('Confirmar'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      await ref.read(appLockProvider.notifier).setupPin(pinController.text);
+    }
+    pinController.dispose();
+    confirmController.dispose();
   }
 
   void _showComingSoon(BuildContext context) {
