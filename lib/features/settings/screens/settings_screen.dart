@@ -1,7 +1,9 @@
 import 'dart:convert';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../app/theme_mode_provider.dart';
@@ -10,6 +12,7 @@ import '../../../core/widgets/responsive_center.dart';
 import '../../transactions/providers/categories_provider.dart';
 import '../../transactions/providers/transactions_provider.dart';
 import '../../transactions/services/transaction_csv_exporter.dart';
+import '../../transactions/services/transaction_csv_importer.dart';
 import '../../transactions/services/transaction_pdf_exporter.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -77,8 +80,8 @@ class SettingsScreen extends ConsumerWidget {
             ListTile(
               leading: const Icon(Icons.download_outlined),
               title: const Text('Importar dados'),
-              subtitle: const Text('Disponível na Fase 12'),
-              onTap: () => _showComingSoon(context),
+              subtitle: const Text('Importa transações de um arquivo CSV'),
+              onTap: () => _importData(context, ref),
             ),
             const Divider(),
             const _SectionLabel('Sobre'),
@@ -200,6 +203,31 @@ class SettingsScreen extends ConsumerWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Não foi possível exportar: $e')),
+        );
+      }
+    }
+  }
+
+  Future<void> _importData(BuildContext context, WidgetRef ref) async {
+    try {
+      final files = await FilePicker.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['csv'],
+      );
+      if (files.isEmpty) return;
+
+      final bytes = await files.first.readAsBytes();
+      final content = utf8.decode(bytes);
+      final categories = await ref.read(categoriesProvider.future);
+      final parsed = TransactionCsvImporter.parse(content, categories);
+
+      if (context.mounted) {
+        context.push('/settings/import-preview', extra: parsed);
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Não foi possível importar: $e')),
         );
       }
     }

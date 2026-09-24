@@ -12,9 +12,11 @@ import '../features/goals/screens/goal_form_screen.dart';
 import '../features/goals/screens/goals_screen.dart';
 import '../features/reports/screens/reports_screen.dart';
 import '../features/settings/screens/settings_screen.dart';
+import '../features/transactions/screens/import_preview_screen.dart';
 import '../features/transactions/screens/transaction_detail_screen.dart';
 import '../features/transactions/screens/transaction_form_screen.dart';
 import '../features/transactions/screens/transactions_screen.dart';
+import '../features/transactions/services/transaction_csv_importer.dart';
 import 'main_shell.dart';
 
 final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -152,6 +154,16 @@ GoRouter createRouter(WidgetRef ref) {
         path: '/settings',
         parentNavigatorKey: rootNavigatorKey,
         pageBuilder: (context, state) => _slideFadePage(state, const SettingsScreen()),
+        routes: [
+          GoRoute(
+            path: 'import-preview',
+            parentNavigatorKey: rootNavigatorKey,
+            pageBuilder: (context, state) => _slideFadePage(
+              state,
+              ImportPreviewScreen(result: state.extra as TransactionImportResult),
+            ),
+          ),
+        ],
       ),
     ],
   );

@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart' hide Transaction;
 
 import '../models/transaction.dart';
+import '../services/transaction_csv_importer.dart' show ParsedTransactionRow;
 
 class TransactionsRepository {
   TransactionsRepository(this._firestore, this._uid);
@@ -25,14 +26,50 @@ class TransactionsRepository {
     required DateTime date,
     String? note,
   }) {
-    return _collection.add({
+    return _collection.add(_toMap(
+      description: description,
+      amount: amount,
+      type: type,
+      categoryId: categoryId,
+      date: date,
+      note: note,
+    ));
+  }
+
+  Future<void> addBatch(List<ParsedTransactionRow> rows) async {
+    final batch = _firestore.batch();
+    for (final row in rows) {
+      batch.set(
+        _collection.doc(),
+        _toMap(
+          description: row.description,
+          amount: row.amount,
+          type: row.type,
+          categoryId: row.categoryId,
+          date: row.date,
+          note: row.note,
+        ),
+      );
+    }
+    await batch.commit();
+  }
+
+  Map<String, dynamic> _toMap({
+    required String description,
+    required double amount,
+    required TransactionType type,
+    required int categoryId,
+    required DateTime date,
+    String? note,
+  }) {
+    return {
       'description': description,
       'amount': amount,
       'type': type.name,
       'categoryId': categoryId,
       'date': Timestamp.fromDate(date),
       'note': note,
-    });
+    };
   }
 
   Future<void> update(Transaction transaction) {

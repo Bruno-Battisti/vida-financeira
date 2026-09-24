@@ -52,6 +52,7 @@ dependencies:
   csv: ^8.0.0
   share_plus: ^13.3.0
   pdf: ^3.13.1
+  file_picker: ^13.1.0
 
 dev_dependencies:
   flutter_test:
