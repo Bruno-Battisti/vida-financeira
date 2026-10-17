@@ -138,6 +138,14 @@ class TransactionDetailScreen extends ConsumerWidget {
                             title: const Text('Data'),
                             subtitle: Text(formatDate(transaction.date)),
                           ),
+                          if (transaction.installmentTotal != null)
+                            ListTile(
+                              leading: const Icon(Icons.credit_card_outlined),
+                              title: const Text('Parcela'),
+                              subtitle: Text(
+                                '${transaction.installmentIndex} de ${transaction.installmentTotal}',
+                              ),
+                            ),
                           if (!transaction.isPaid)
                             ListTile(
                               leading: const Icon(Icons.pending_actions_outlined),

@@ -24,13 +24,14 @@ void main() {
 
     expect(find.text('Nova transação'), findsOneWidget);
 
-    await tester.dragUntilVisible(
-      find.text('Salvar'),
-      find.descendant(of: find.byType(Form), matching: find.byType(ListView)),
-      const Offset(0, -200),
-    );
+    final formListView = find.descendant(of: find.byType(Form), matching: find.byType(ListView));
+    await tester.dragUntilVisible(find.text('Salvar'), formListView, const Offset(0, -200));
     await tester.tap(find.text('Salvar'));
     await tester.pumpAndSettle();
+
+    // Volta ao topo para os campos com erro voltarem a ser construídos
+    // (a ListView não constrói filhos fora da área visível/cache).
+    await tester.dragUntilVisible(find.text('Informe uma descrição.'), formListView, const Offset(0, 200));
 
     expect(find.text('Informe uma descrição.'), findsOneWidget);
     expect(find.text('Informe o valor.'), findsOneWidget);

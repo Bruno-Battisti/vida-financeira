@@ -42,6 +42,53 @@ class TransactionsRepository {
     ));
   }
 
+  /// Cria uma compra parcelada: divide [totalAmount] em [installmentsCount]
+  /// transações mensais, todas ligadas por um `installmentGroupId` comum.
+  /// Parcelas com data no passado ou hoje já nascem pagas; as futuras
+  /// nascem como pendentes (`isPaid: false`) com vencimento na própria data,
+  /// até que o mês chegue e o usuário as marque como pagas.
+  Future<void> addInstallments({
+    required String description,
+    required double totalAmount,
+    required TransactionType type,
+    required int categoryId,
+    required DateTime firstDate,
+    required int installmentsCount,
+    String? note,
+  }) async {
+    final groupId = _collection.doc().id;
+    final baseAmount = (totalAmount / installmentsCount * 100).round() / 100;
+    final lastAmount = double.parse((totalAmount - baseAmount * (installmentsCount - 1)).toStringAsFixed(2));
+    final now = DateTime.now();
+
+    final batch = _firestore.batch();
+    for (var i = 0; i < installmentsCount; i++) {
+      final installmentDate = DateTime(firstDate.year, firstDate.month + i, firstDate.day);
+      final isPaid = !installmentDate.isAfter(now);
+      final amount = i == installmentsCount - 1 ? lastAmount : baseAmount;
+
+      batch.set(
+        _collection.doc(),
+        {
+          ..._toMap(
+            description: description,
+            amount: amount,
+            type: type,
+            categoryId: categoryId,
+            date: installmentDate,
+            note: note,
+            dueDate: isPaid ? null : installmentDate,
+            isPaid: isPaid,
+          ),
+          'installmentGroupId': groupId,
+          'installmentIndex': i + 1,
+          'installmentTotal': installmentsCount,
+        },
+      );
+    }
+    await batch.commit();
+  }
+
   Future<void> addBatch(List<ParsedTransactionRow> rows) async {
     final batch = _firestore.batch();
     for (final row in rows) {
@@ -116,6 +163,9 @@ class TransactionsRepository {
       dueDate: (data['dueDate'] as Timestamp?)?.toDate(),
       isPaid: data['isPaid'] as bool? ?? true,
       recurringRuleId: data['recurringRuleId'] as String?,
+      installmentGroupId: data['installmentGroupId'] as String?,
+      installmentIndex: (data['installmentIndex'] as num?)?.toInt(),
+      installmentTotal: (data['installmentTotal'] as num?)?.toInt(),
     );
   }
 }

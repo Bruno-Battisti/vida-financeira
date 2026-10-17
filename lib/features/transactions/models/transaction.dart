@@ -22,5 +22,11 @@ abstract class Transaction with _$Transaction {
     /// Preenchido quando a transação foi gerada automaticamente a partir de
     /// uma regra de recorrência.
     String? recurringRuleId,
+    /// Id compartilhado por todas as parcelas de uma mesma compra parcelada.
+    String? installmentGroupId,
+    /// Posição desta parcela (1-based) dentro do grupo de parcelamento.
+    int? installmentIndex,
+    /// Número total de parcelas do grupo de parcelamento.
+    int? installmentTotal,
   }) = _Transaction;
 }

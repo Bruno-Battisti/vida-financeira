@@ -268,11 +268,16 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
             ),
             title: Text(transaction.description),
             subtitle: Text(
-              transaction.isPaid
-                  ? '${category?.name ?? 'Categoria'} · ${formatDate(transaction.date)}'
-                  : '${category?.name ?? 'Categoria'} · '
-                      '${isOverdue ? 'Atrasada' : 'Pendente'} · '
-                      'vence em ${formatDate(transaction.dueDate!)}',
+              [
+                category?.name ?? 'Categoria',
+                if (transaction.installmentTotal != null)
+                  'parcela ${transaction.installmentIndex}/${transaction.installmentTotal}'
+                else if (!transaction.isPaid)
+                  isOverdue ? 'Atrasada' : 'Pendente',
+                transaction.isPaid
+                    ? formatDate(transaction.date)
+                    : 'vence em ${formatDate(transaction.dueDate!)}',
+              ].join(' · '),
               style: isOverdue ? const TextStyle(color: Colors.red) : null,
             ),
             trailing: Text(

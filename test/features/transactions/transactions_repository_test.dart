@@ -133,6 +133,58 @@ void main() {
     expect(updated.isPaid, isTrue);
   });
 
+  test('addInstallments() divide o valor em parcelas mensais ligadas pelo grupo', () async {
+    final firstDate = DateTime(2020, 1, 15);
+
+    await repository.addInstallments(
+      description: 'Notebook',
+      totalAmount: 300,
+      type: TransactionType.expense,
+      categoryId: 5,
+      firstDate: firstDate,
+      installmentsCount: 3,
+    );
+
+    final transactions = (await repository.watchAll().first)
+      ..sort((a, b) => a.date.compareTo(b.date));
+    expect(transactions, hasLength(3));
+
+    final groupId = transactions.first.installmentGroupId;
+    expect(groupId, isNotNull);
+    expect(transactions.every((t) => t.installmentGroupId == groupId), isTrue);
+    expect(transactions.map((t) => t.installmentIndex), [1, 2, 3]);
+    expect(transactions.map((t) => t.installmentTotal), [3, 3, 3]);
+    expect(transactions.map((t) => t.amount).reduce((a, b) => a + b), 300);
+    expect(transactions.map((t) => t.date), [
+      DateTime(2020, 1, 15),
+      DateTime(2020, 2, 15),
+      DateTime(2020, 3, 15),
+    ]);
+    // Parcelas de 2020 já venceram: todas devem ter nascido pagas.
+    expect(transactions.every((t) => t.isPaid), isTrue);
+  });
+
+  test('addInstallments() marca parcelas futuras como pendentes com vencimento', () async {
+    final firstDate = DateTime.now();
+
+    await repository.addInstallments(
+      description: 'Celular',
+      totalAmount: 1200,
+      type: TransactionType.expense,
+      categoryId: 5,
+      firstDate: firstDate,
+      installmentsCount: 3,
+    );
+
+    final transactions = (await repository.watchAll().first)
+      ..sort((a, b) => a.date.compareTo(b.date));
+
+    expect(transactions.first.isPaid, isTrue);
+    expect(transactions[1].isPaid, isFalse);
+    expect(transactions[1].dueDate, isNotNull);
+    expect(transactions[2].isPaid, isFalse);
+  });
+
   test('cada usuário só vê as próprias transações', () async {
     final otherUserRepo = TransactionsRepository(firestore, 'user-2');
 

@@ -25,6 +25,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
   final _descriptionController = TextEditingController();
   final _amountController = TextEditingController();
   final _noteController = TextEditingController();
+  final _installmentsController = TextEditingController(text: '2');
 
   late TransactionType _type = widget.prefillCategory == null
       ? TransactionType.expense
@@ -36,12 +37,14 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
   bool _saving = false;
   bool _isPending = false;
   DateTime? _dueDate;
+  bool _isInstallment = false;
 
   @override
   void dispose() {
     _descriptionController.dispose();
     _amountController.dispose();
     _noteController.dispose();
+    _installmentsController.dispose();
     super.dispose();
   }
 
@@ -87,16 +90,28 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
     final note = _noteController.text.trim();
 
     try {
-      await ref.read(transactionsRepositoryProvider).add(
-            description: _descriptionController.text.trim(),
-            amount: amount,
-            type: _type,
-            categoryId: _category!.id,
-            date: _date,
-            note: note.isEmpty ? null : note,
-            isPaid: !_isPending,
-            dueDate: _isPending ? _dueDate : null,
-          );
+      if (_isInstallment) {
+        await ref.read(transactionsRepositoryProvider).addInstallments(
+              description: _descriptionController.text.trim(),
+              totalAmount: amount,
+              type: _type,
+              categoryId: _category!.id,
+              firstDate: _date,
+              installmentsCount: int.parse(_installmentsController.text.trim()),
+              note: note.isEmpty ? null : note,
+            );
+      } else {
+        await ref.read(transactionsRepositoryProvider).add(
+              description: _descriptionController.text.trim(),
+              amount: amount,
+              type: _type,
+              categoryId: _category!.id,
+              date: _date,
+              note: note.isEmpty ? null : note,
+              isPaid: !_isPending,
+              dueDate: _isPending ? _dueDate : null,
+            );
+      }
       if (mounted) {
         context.pop(true);
       }
@@ -169,8 +184,10 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _amountController,
-                    decoration: const InputDecoration(
-                        labelText: 'Valor', prefixText: 'R\$ '),
+                    decoration: InputDecoration(
+                      labelText: _isInstallment ? 'Valor total da compra' : 'Valor',
+                      prefixText: 'R\$ ',
+                    ),
                     keyboardType:
                         const TextInputType.numberWithOptions(decimal: true),
                     validator: (value) {
@@ -211,22 +228,50 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                   const SizedBox(height: 16),
                   SwitchListTile(
                     contentPadding: EdgeInsets.zero,
-                    title: const Text('Conta a pagar/receber'),
-                    subtitle: const Text('Ainda não foi paga ou recebida'),
-                    value: _isPending,
+                    title: const Text('Parcelar compra'),
+                    subtitle: const Text('Divide o valor em parcelas mensais'),
+                    value: _isInstallment,
                     onChanged: (value) => setState(() {
-                      _isPending = value;
-                      if (!value) _dueDate = null;
+                      _isInstallment = value;
+                      if (value) {
+                        _isPending = false;
+                        _dueDate = null;
+                      }
                     }),
                   ),
-                  if (_isPending)
-                    ListTile(
+                  if (_isInstallment)
+                    TextFormField(
+                      controller: _installmentsController,
+                      decoration: const InputDecoration(labelText: 'Número de parcelas'),
+                      keyboardType: TextInputType.number,
+                      validator: (value) {
+                        final parsed = int.tryParse((value ?? '').trim());
+                        if (parsed == null || parsed < 2) {
+                          return 'Informe pelo menos 2 parcelas.';
+                        }
+                        return null;
+                      },
+                    )
+                  else ...[
+                    SwitchListTile(
                       contentPadding: EdgeInsets.zero,
-                      title: const Text('Vencimento'),
-                      subtitle: Text(_dueDate == null ? 'Selecione a data' : formatDate(_dueDate!)),
-                      trailing: const Icon(Icons.event_outlined),
-                      onTap: _pickDueDate,
+                      title: const Text('Conta a pagar/receber'),
+                      subtitle: const Text('Ainda não foi paga ou recebida'),
+                      value: _isPending,
+                      onChanged: (value) => setState(() {
+                        _isPending = value;
+                        if (!value) _dueDate = null;
+                      }),
                     ),
+                    if (_isPending)
+                      ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: const Text('Vencimento'),
+                        subtitle: Text(_dueDate == null ? 'Selecione a data' : formatDate(_dueDate!)),
+                        trailing: const Icon(Icons.event_outlined),
+                        onTap: _pickDueDate,
+                      ),
+                  ],
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _noteController,
