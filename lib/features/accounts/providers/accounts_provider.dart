@@ -4,9 +4,25 @@ import '../../../core/providers/firebase_providers.dart';
 import '../../transactions/models/transaction.dart';
 import '../../transactions/providers/transactions_provider.dart';
 import '../models/account.dart';
+import '../models/transfer.dart';
 import '../repositories/accounts_repository.dart';
+import '../repositories/transfers_repository.dart';
 
 part 'accounts_provider.g.dart';
+
+@riverpod
+TransfersRepository transfersRepository(Ref ref) {
+  final uid = ref.watch(authStateProvider).value?.uid;
+  if (uid == null) {
+    throw StateError('transfersRepositoryProvider requer um usuário autenticado.');
+  }
+  return TransfersRepository(ref.watch(firestoreProvider), uid);
+}
+
+@riverpod
+Stream<List<Transfer>> transfers(Ref ref) {
+  return ref.watch(transfersRepositoryProvider).watchAll();
+}
 
 @riverpod
 AccountsRepository accountsRepository(Ref ref) {
@@ -47,11 +63,12 @@ typedef AccountBalance = ({Account account, double balance});
 
 /// Saldo de cada conta: saldo inicial + soma das transações já pagas
 /// atribuídas a ela (transações antigas sem `accountId` contam para a
-/// conta padrão).
+/// conta padrão) + transferências recebidas/enviadas.
 @riverpod
 Future<List<AccountBalance>> accountBalances(Ref ref) async {
   final accounts = await ref.watch(accountsProvider.future);
   final transactions = await ref.watch(transactionsProvider.future);
+  final transfers = await ref.watch(transfersProvider.future);
   final defaultAccount = _defaultAccount(accounts);
 
   final totalsByAccount = <String, double>{};
@@ -61,6 +78,10 @@ Future<List<AccountBalance>> accountBalances(Ref ref) async {
     if (accountId == null) continue;
     final signed = t.type == TransactionType.income ? t.amount : -t.amount;
     totalsByAccount.update(accountId, (v) => v + signed, ifAbsent: () => signed);
+  }
+  for (final transfer in transfers) {
+    totalsByAccount.update(transfer.fromAccountId, (v) => v - transfer.amount, ifAbsent: () => -transfer.amount);
+    totalsByAccount.update(transfer.toAccountId, (v) => v + transfer.amount, ifAbsent: () => transfer.amount);
   }
 
   return accounts

@@ -9,6 +9,93 @@ part of 'accounts_provider.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
+@ProviderFor(transfersRepository)
+final transfersRepositoryProvider = TransfersRepositoryProvider._();
+
+final class TransfersRepositoryProvider
+    extends
+        $FunctionalProvider<
+          TransfersRepository,
+          TransfersRepository,
+          TransfersRepository
+        >
+    with $Provider<TransfersRepository> {
+  TransfersRepositoryProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'transfersRepositoryProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$transfersRepositoryHash();
+
+  @$internal
+  @override
+  $ProviderElement<TransfersRepository> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  TransfersRepository create(Ref ref) {
+    return transfersRepository(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(TransfersRepository value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<TransfersRepository>(value),
+    );
+  }
+}
+
+String _$transfersRepositoryHash() =>
+    r'be45cc5a10e6b26023640a05212b7f6d06b4b77e';
+
+@ProviderFor(transfers)
+final transfersProvider = TransfersProvider._();
+
+final class TransfersProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<Transfer>>,
+          List<Transfer>,
+          Stream<List<Transfer>>
+        >
+    with $FutureModifier<List<Transfer>>, $StreamProvider<List<Transfer>> {
+  TransfersProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'transfersProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$transfersHash();
+
+  @$internal
+  @override
+  $StreamProviderElement<List<Transfer>> $createElement(
+    $ProviderPointer pointer,
+  ) => $StreamProviderElement(pointer);
+
+  @override
+  Stream<List<Transfer>> create(Ref ref) {
+    return transfers(ref);
+  }
+}
+
+String _$transfersHash() => r'6170765e982d52c3517088125a6408c26110ade8';
+
 @ProviderFor(accountsRepository)
 final accountsRepositoryProvider = AccountsRepositoryProvider._();
 
@@ -139,18 +226,18 @@ final class EnsureDefaultAccountProvider
 }
 
 String _$ensureDefaultAccountHash() =>
-    r'107bb72cf42b02bf884a5fde8f0fcf7099f9aa44';
+    r'64ab443ba3c0185c44ddaa5daecd0620d799e5bb';
 
 /// Saldo de cada conta: saldo inicial + soma das transações já pagas
 /// atribuídas a ela (transações antigas sem `accountId` contam para a
-/// conta padrão).
+/// conta padrão) + transferências recebidas/enviadas.
 
 @ProviderFor(accountBalances)
 final accountBalancesProvider = AccountBalancesProvider._();
 
 /// Saldo de cada conta: saldo inicial + soma das transações já pagas
 /// atribuídas a ela (transações antigas sem `accountId` contam para a
-/// conta padrão).
+/// conta padrão) + transferências recebidas/enviadas.
 
 final class AccountBalancesProvider
     extends
@@ -164,7 +251,7 @@ final class AccountBalancesProvider
         $FutureProvider<List<AccountBalance>> {
   /// Saldo de cada conta: saldo inicial + soma das transações já pagas
   /// atribuídas a ela (transações antigas sem `accountId` contam para a
-  /// conta padrão).
+  /// conta padrão) + transferências recebidas/enviadas.
   AccountBalancesProvider._()
     : super(
         from: null,
@@ -191,4 +278,4 @@ final class AccountBalancesProvider
   }
 }
 
-String _$accountBalancesHash() => r'f563d06b49351eb9c2526b0526f8876bd6dc93bb';
+String _$accountBalancesHash() => r'ab18f529af358b42cbd837a888ddc75325767a89';
