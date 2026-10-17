@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../../../core/utils/formatters.dart';
 import '../../budgets/providers/budgets_provider.dart';
 import '../../transactions/models/transaction.dart';
 import '../../transactions/providers/categories_provider.dart';
+import '../providers/balance_projection_provider.dart';
 import '../providers/dashboard_providers.dart';
 import '../widgets/exchange_rate_card.dart';
 
@@ -37,6 +39,8 @@ class DashboardScreen extends ConsumerWidget {
         const ExchangeRateCard(),
         const SizedBox(height: 16),
         const _BudgetAlerts(),
+        const _BalanceProjectionCard(),
+        const SizedBox(height: 16),
         Row(
           children: [
             Expanded(
@@ -163,6 +167,61 @@ class _BudgetAlerts extends ConsumerWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _BalanceProjectionCard extends ConsumerWidget {
+  const _BalanceProjectionCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final projectionAsync = ref.watch(balanceProjectionProvider);
+    final monthFormat = DateFormat('MMM/yy', 'pt_BR');
+
+    return projectionAsync.when(
+      loading: () => const SizedBox.shrink(),
+      error: (error, _) => const SizedBox.shrink(),
+      data: (projection) {
+        return Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Projeção de saldo', style: Theme.of(context).textTheme.titleMedium),
+                const SizedBox(height: 4),
+                Text(
+                  'Considerando contas pendentes, parcelas e recorrências já conhecidas',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: projection.months.map((point) {
+                    final isNegative = point.projectedBalance < 0;
+                    return Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(monthFormat.format(point.month), style: Theme.of(context).textTheme.bodySmall),
+                          const SizedBox(height: 2),
+                          Text(
+                            formatCurrency(point.projectedBalance),
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: isNegative ? Colors.red : null,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
