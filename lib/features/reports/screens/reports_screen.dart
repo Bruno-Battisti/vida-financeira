@@ -87,9 +87,86 @@ class ReportsScreen extends ConsumerWidget {
                 ),
               ),
             ),
+            const SizedBox(height: 16),
+            _AnnualSummaryCard(summary: reports.annualSummary),
           ],
         );
       },
+    );
+  }
+}
+
+class _AnnualSummaryCard extends StatelessWidget {
+  const _AnnualSummaryCard({required this.summary});
+
+  final AnnualSummary summary;
+
+  @override
+  Widget build(BuildContext context) {
+    final balance = summary.totalIncome - summary.totalExpense;
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Resumo anual (${summary.year})', style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: _AnnualTotal(label: 'Receitas', value: summary.totalIncome, color: Colors.green),
+                ),
+                Expanded(
+                  child: _AnnualTotal(label: 'Despesas', value: summary.totalExpense, color: Colors.red),
+                ),
+                Expanded(
+                  child: _AnnualTotal(
+                    label: 'Saldo',
+                    value: balance,
+                    color: balance >= 0 ? Colors.green : Colors.red,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            MonthlyEvolutionChart(months: summary.months),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: const [
+                _LegendDot(color: Colors.green, label: 'Receitas'),
+                SizedBox(width: 16),
+                _LegendDot(color: Colors.red, label: 'Despesas'),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _AnnualTotal extends StatelessWidget {
+  const _AnnualTotal({required this.label, required this.value, required this.color});
+
+  final String label;
+  final double value;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: Theme.of(context).textTheme.bodySmall),
+        const SizedBox(height: 2),
+        Text(
+          formatCurrency(value),
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(color: color, fontWeight: FontWeight.bold),
+        ),
+      ],
     );
   }
 }

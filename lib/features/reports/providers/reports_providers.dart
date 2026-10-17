@@ -23,12 +23,20 @@ typedef MonthComparison = ({
   List<CategoryComparison> expenseByCategory,
 });
 
+typedef AnnualSummary = ({
+  int year,
+  double totalIncome,
+  double totalExpense,
+  List<MonthlyTotals> months,
+});
+
 typedef ReportsData = ({
   double totalIncome,
   double totalExpense,
   List<CategoryBreakdown> expenseByCategory,
   List<MonthlyTotals> monthlyEvolution,
   MonthComparison monthComparison,
+  AnnualSummary annualSummary,
 });
 
 /// Variação percentual de [current] em relação a [previous]. `null` quando
@@ -81,6 +89,28 @@ Future<ReportsData> reportsData(Ref ref) async {
     expenseByCategory: expenseByCategory,
     monthlyEvolution: monthlyEvolution,
     monthComparison: _monthComparison(transactions, categoryMap, now),
+    annualSummary: _annualSummary(transactions, now.year),
+  );
+}
+
+AnnualSummary _annualSummary(List<Transaction> transactions, int year) {
+  final months = List.generate(12, (i) {
+    final month = DateTime(year, i + 1);
+    final inMonth = transactions.where((t) => t.date.year == month.year && t.date.month == month.month);
+    final income = inMonth
+        .where((t) => t.type == TransactionType.income)
+        .fold(0.0, (sum, t) => sum + t.amount);
+    final expense = inMonth
+        .where((t) => t.type == TransactionType.expense)
+        .fold(0.0, (sum, t) => sum + t.amount);
+    return (month: month, income: income, expense: expense);
+  });
+
+  return (
+    year: year,
+    totalIncome: months.fold(0.0, (sum, m) => sum + m.income),
+    totalExpense: months.fold(0.0, (sum, m) => sum + m.expense),
+    months: months,
   );
 }
 
