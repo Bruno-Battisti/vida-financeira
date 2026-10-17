@@ -10,6 +10,7 @@ import 'package:share_plus/share_plus.dart';
 import '../../../app/theme_mode_provider.dart';
 import '../../../core/providers/firebase_providers.dart';
 import '../../../core/widgets/responsive_center.dart';
+import '../../notifications/providers/notifications_provider.dart';
 import '../../security/providers/app_lock_provider.dart';
 import '../../transactions/providers/categories_provider.dart';
 import '../../transactions/providers/transactions_provider.dart';
@@ -25,6 +26,7 @@ class SettingsScreen extends ConsumerWidget {
     final themeMode = ref.watch(themeModeProvider);
     final user = ref.watch(firebaseAuthProvider).currentUser;
     final lockState = ref.watch(appLockProvider);
+    final remindersEnabled = ref.watch(remindersEnabledProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Configurações')),
@@ -99,11 +101,12 @@ class SettingsScreen extends ConsumerWidget {
               subtitle: const Text('Real (R\$)'),
               onTap: () => _showComingSoon(context),
             ),
-            ListTile(
-              leading: const Icon(Icons.notifications_outlined),
-              title: const Text('Notificações'),
-              subtitle: const Text('Disponível na Fase 12'),
-              onTap: () => _showComingSoon(context),
+            SwitchListTile(
+              secondary: const Icon(Icons.notifications_outlined),
+              title: const Text('Lembretes'),
+              subtitle: const Text('Avisa quando uma conta vence ou uma meta está perto do prazo'),
+              value: remindersEnabled,
+              onChanged: (value) => ref.read(remindersEnabledProvider.notifier).setEnabled(value),
             ),
             const Divider(),
             const _SectionLabel('Dados'),

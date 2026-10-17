@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/widgets/responsive_center.dart';
+import '../features/notifications/providers/notifications_provider.dart';
 import '../features/recurring/providers/recurring_rules_provider.dart';
 
 class _NavItem {
@@ -44,6 +45,8 @@ class MainShell extends ConsumerWidget {
     // Dispara, uma única vez por sessão, a geração de transações de
     // recorrências já vencidas (ver recurringGenerationProvider).
     ref.watch(recurringGenerationProvider);
+    // Mantém os lembretes de vencimento/metas em dia conforme os dados mudam.
+    ref.watch(reminderSchedulingProvider);
     final wide = isWideScreen(context);
 
     return Scaffold(
