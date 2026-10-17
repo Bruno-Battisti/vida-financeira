@@ -14,6 +14,7 @@ import '../features/reports/screens/reports_screen.dart';
 import '../features/security/providers/app_lock_provider.dart';
 import '../features/security/screens/lock_screen.dart';
 import '../features/settings/screens/settings_screen.dart';
+import '../features/transactions/models/category.dart';
 import '../features/transactions/screens/import_preview_screen.dart';
 import '../features/transactions/screens/transaction_detail_screen.dart';
 import '../features/transactions/screens/transaction_form_screen.dart';
@@ -108,7 +109,10 @@ GoRouter createRouter(WidgetRef ref) {
                   GoRoute(
                     path: 'new',
                     parentNavigatorKey: rootNavigatorKey,
-                    pageBuilder: (context, state) => _slideFadePage(state, const TransactionFormScreen()),
+                    pageBuilder: (context, state) => _slideFadePage(
+                      state,
+                      TransactionFormScreen(prefillCategory: state.extra as Category?),
+                    ),
                   ),
                   GoRoute(
                     path: ':id',

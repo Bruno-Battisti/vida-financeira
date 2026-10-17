@@ -9,6 +9,13 @@ import '../models/transaction.dart';
 import '../providers/categories_provider.dart';
 import '../providers/transactions_provider.dart';
 
+class _QuickAddResult {
+  const _QuickAddResult(this.category);
+
+  /// `null` representa a escolha explícita de "transação em branco".
+  final Category? category;
+}
+
 enum _TransactionFilter { all, income, expense }
 
 class _AdvancedFilters {
@@ -186,18 +193,35 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          final created = await context.push<bool>('/transactions/new');
-          if (created == true && context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Transação criada com sucesso!')),
-            );
-          }
-        },
+        onPressed: () => _startNewTransaction(context),
         tooltip: 'Nova transação',
         child: const Icon(Icons.add),
       ),
     );
+  }
+
+  Future<void> _startNewTransaction(BuildContext context) async {
+    final recentCategories = await ref.read(recentCategoriesProvider.future);
+    if (!context.mounted) return;
+
+    Category? prefillCategory;
+    if (recentCategories.isNotEmpty) {
+      final result = await showModalBottomSheet<_QuickAddResult>(
+        context: context,
+        builder: (context) => _QuickAddSheet(recentCategories: recentCategories),
+      );
+      if (result == null) return;
+      prefillCategory = result.category;
+    }
+
+    if (!context.mounted) return;
+    final created =
+        await context.push<bool>('/transactions/new', extra: prefillCategory);
+    if (created == true && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Transação criada com sucesso!')),
+      );
+    }
   }
 
   Future<void> _openFilterSheet(BuildContext context, List<Category> categories) async {
@@ -403,6 +427,52 @@ class _FilterSheetState extends State<_FilterSheet> {
                 },
                 child: const Text('Aplicar filtros'),
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _QuickAddSheet extends StatelessWidget {
+  const _QuickAddSheet({required this.recentCategories});
+
+  final List<Category> recentCategories;
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('Lançamento rápido', style: Theme.of(context).textTheme.titleLarge),
+            const SizedBox(height: 4),
+            Text(
+              'Toque em uma categoria usada recentemente para pré-preencher o formulário.',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(height: 16),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: recentCategories.map((category) {
+                return ActionChip(
+                  avatar: Icon(category.icon, size: 18),
+                  label: Text(category.name),
+                  onPressed: () =>
+                      Navigator.of(context).pop(_QuickAddResult(category)),
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 16),
+            OutlinedButton.icon(
+              icon: const Icon(Icons.add),
+              label: const Text('Transação em branco'),
+              onPressed: () => Navigator.of(context).pop(const _QuickAddResult(null)),
             ),
           ],
         ),

@@ -10,7 +10,10 @@ import '../providers/categories_provider.dart';
 import '../providers/transactions_provider.dart';
 
 class TransactionFormScreen extends ConsumerStatefulWidget {
-  const TransactionFormScreen({super.key});
+  const TransactionFormScreen({super.key, this.prefillCategory});
+
+  /// Categoria pré-selecionada ao abrir pelo atalho de lançamento rápido.
+  final Category? prefillCategory;
 
   @override
   ConsumerState<TransactionFormScreen> createState() =>
@@ -23,8 +26,12 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
   final _amountController = TextEditingController();
   final _noteController = TextEditingController();
 
-  TransactionType _type = TransactionType.expense;
-  Category? _category;
+  late TransactionType _type = widget.prefillCategory == null
+      ? TransactionType.expense
+      : widget.prefillCategory!.type == CategoryType.income
+          ? TransactionType.income
+          : TransactionType.expense;
+  late Category? _category = widget.prefillCategory;
   DateTime _date = DateTime.now();
   bool _saving = false;
 

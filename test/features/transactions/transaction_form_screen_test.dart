@@ -19,6 +19,9 @@ void main() {
     await tester.tap(find.byIcon(Icons.add));
     await tester.pumpAndSettle();
 
+    await tester.tap(find.text('Transação em branco'));
+    await tester.pumpAndSettle();
+
     expect(find.text('Nova transação'), findsOneWidget);
 
     await tester.tap(find.text('Salvar'));
@@ -38,6 +41,9 @@ void main() {
     await tester.pumpAndSettle();
 
     await tester.tap(find.byIcon(Icons.add));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Transação em branco'));
     await tester.pumpAndSettle();
 
     await tester.enterText(find.widgetWithText(TextFormField, 'Descrição'), 'Pizza da sexta');

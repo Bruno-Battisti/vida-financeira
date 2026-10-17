@@ -165,3 +165,50 @@ final class CategoryByIdFamily extends $Family
   @override
   String toString() => r'categoryByIdProvider';
 }
+
+/// Categorias usadas mais recentemente, derivadas da ordem (por data) das
+/// transações já carregadas — usado no atalho de lançamento rápido.
+
+@ProviderFor(recentCategories)
+final recentCategoriesProvider = RecentCategoriesProvider._();
+
+/// Categorias usadas mais recentemente, derivadas da ordem (por data) das
+/// transações já carregadas — usado no atalho de lançamento rápido.
+
+final class RecentCategoriesProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<Category>>,
+          List<Category>,
+          FutureOr<List<Category>>
+        >
+    with $FutureModifier<List<Category>>, $FutureProvider<List<Category>> {
+  /// Categorias usadas mais recentemente, derivadas da ordem (por data) das
+  /// transações já carregadas — usado no atalho de lançamento rápido.
+  RecentCategoriesProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'recentCategoriesProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$recentCategoriesHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<List<Category>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<Category>> create(Ref ref) {
+    return recentCategories(ref);
+  }
+}
+
+String _$recentCategoriesHash() => r'28001786ce9ac1a3c341c03d4cadd06bc76be974';
