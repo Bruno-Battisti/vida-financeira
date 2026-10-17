@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../core/providers/firebase_providers.dart';
 import '../features/accounts/screens/accounts_screen.dart';
+import '../features/accounts/screens/credit_card_invoice_screen.dart';
 import '../features/auth/screens/auth_screen.dart';
 import '../features/budgets/screens/budgets_screen.dart';
 import '../features/dashboard/screens/dashboard_screen.dart';
@@ -187,6 +188,16 @@ GoRouter createRouter(WidgetRef ref) {
             path: 'accounts',
             parentNavigatorKey: rootNavigatorKey,
             pageBuilder: (context, state) => _slideFadePage(state, const AccountsScreen()),
+            routes: [
+              GoRoute(
+                path: ':id/invoice',
+                parentNavigatorKey: rootNavigatorKey,
+                pageBuilder: (context, state) {
+                  final id = state.pathParameters['id']!;
+                  return _slideFadePage(state, CreditCardInvoiceScreen(accountId: id));
+                },
+              ),
+            ],
           ),
           GoRoute(
             path: 'recurring',

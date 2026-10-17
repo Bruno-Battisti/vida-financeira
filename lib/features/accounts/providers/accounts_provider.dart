@@ -88,3 +88,46 @@ Future<List<AccountBalance>> accountBalances(Ref ref) async {
       .map((a) => (account: a, balance: a.initialBalance + (totalsByAccount[a.id] ?? 0)))
       .toList();
 }
+
+typedef CreditCardInvoice = ({
+  DateTime periodStart,
+  DateTime periodEnd,
+  double total,
+  List<Transaction> transactions,
+});
+
+/// Data de fechamento mais recente que já passou (ou é hoje) — é o fim do
+/// ciclo cuja fatura já está fechada e pronta para pagar.
+DateTime _mostRecentClosing(int closingDay, DateTime now) {
+  final closingThisMonth = DateTime(now.year, now.month, closingDay);
+  if (!closingThisMonth.isAfter(now)) return closingThisMonth;
+  return DateTime(now.year, now.month - 1, closingDay);
+}
+
+/// Fatura fechada mais recente de um cartão de crédito: soma das compras do
+/// ciclo (já inclui parcelas, que são transações normais com `accountId`
+/// apontando para o cartão).
+@riverpod
+Future<CreditCardInvoice> creditCardInvoice(Ref ref, String accountId) async {
+  final accounts = await ref.watch(accountsProvider.future);
+  final account = accounts.firstWhere((a) => a.id == accountId);
+  final closingDay = account.closingDay ?? 1;
+  final now = DateTime.now();
+
+  final periodEnd = _mostRecentClosing(closingDay, now);
+  final periodStart = DateTime(periodEnd.year, periodEnd.month - 1, closingDay + 1);
+
+  final transactions = await ref.watch(transactionsProvider.future);
+  final periodTransactions = transactions
+      .where((t) =>
+          t.accountId == accountId && !t.date.isBefore(periodStart) && !t.date.isAfter(periodEnd))
+      .toList()
+    ..sort((a, b) => b.date.compareTo(a.date));
+
+  final total = periodTransactions.fold(
+    0.0,
+    (sum, t) => sum + (t.type == TransactionType.expense ? t.amount : -t.amount),
+  );
+
+  return (periodStart: periodStart, periodEnd: periodEnd, total: total, transactions: periodTransactions);
+}

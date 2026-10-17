@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/utils/formatters.dart';
 import '../models/account.dart';
@@ -66,6 +67,9 @@ class AccountsScreen extends ConsumerWidget {
                     leading: Icon(_iconFor(item.account.type)),
                     title: Text(item.account.name),
                     subtitle: Text(_typeLabel(item.account.type)),
+                    onTap: item.account.type == AccountType.creditCard
+                        ? () => context.push('/settings/accounts/${item.account.id}/invoice')
+                        : null,
                     trailing: Column(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.end,
@@ -222,6 +226,8 @@ class AccountsScreen extends ConsumerWidget {
     final nameController = TextEditingController(text: current?.name ?? '');
     final balanceController =
         TextEditingController(text: current == null ? '0' : current.initialBalance.toStringAsFixed(2));
+    final closingDayController =
+        TextEditingController(text: (current?.closingDay ?? 1).toString());
     var type = current?.type ?? AccountType.checking;
     final formKey = GlobalKey<FormState>();
 
@@ -260,6 +266,21 @@ class AccountsScreen extends ConsumerWidget {
                     return parsed == null ? 'Valor inválido.' : null;
                   },
                 ),
+                if (type == AccountType.creditCard) ...[
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: closingDayController,
+                    decoration: const InputDecoration(labelText: 'Dia de fechamento da fatura'),
+                    keyboardType: TextInputType.number,
+                    validator: (value) {
+                      final parsed = int.tryParse((value ?? '').trim());
+                      if (parsed == null || parsed < 1 || parsed > 28) {
+                        return 'Informe um dia entre 1 e 28.';
+                      }
+                      return null;
+                    },
+                  ),
+                ],
               ],
             ),
           ),
@@ -278,16 +299,28 @@ class AccountsScreen extends ConsumerWidget {
 
     if (confirmed == true) {
       final initialBalance = double.parse(balanceController.text.trim().replaceAll(',', '.'));
+      final closingDay = type == AccountType.creditCard ? int.parse(closingDayController.text.trim()) : null;
       final repository = ref.read(accountsRepositoryProvider);
       if (current == null) {
-        await repository.add(name: nameController.text.trim(), type: type, initialBalance: initialBalance);
+        await repository.add(
+          name: nameController.text.trim(),
+          type: type,
+          initialBalance: initialBalance,
+          closingDay: closingDay,
+        );
       } else {
         await repository.update(
-          current.copyWith(name: nameController.text.trim(), type: type, initialBalance: initialBalance),
+          current.copyWith(
+            name: nameController.text.trim(),
+            type: type,
+            initialBalance: initialBalance,
+            closingDay: closingDay,
+          ),
         );
       }
     }
     nameController.dispose();
     balanceController.dispose();
+    closingDayController.dispose();
   }
 }

@@ -15,5 +15,8 @@ abstract class Account with _$Account {
     /// absorve transações antigas que não têm `accountId` e não pode ser
     /// excluída.
     @Default(false) bool isDefault,
+    /// Dia do mês em que a fatura fecha (só relevante para cartão de
+    /// crédito) — define o ciclo usado para agrupar compras em faturas.
+    int? closingDay,
   }) = _Account;
 }

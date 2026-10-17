@@ -279,3 +279,99 @@ final class AccountBalancesProvider
 }
 
 String _$accountBalancesHash() => r'ab18f529af358b42cbd837a888ddc75325767a89';
+
+/// Fatura fechada mais recente de um cartão de crédito: soma das compras do
+/// ciclo (já inclui parcelas, que são transações normais com `accountId`
+/// apontando para o cartão).
+
+@ProviderFor(creditCardInvoice)
+final creditCardInvoiceProvider = CreditCardInvoiceFamily._();
+
+/// Fatura fechada mais recente de um cartão de crédito: soma das compras do
+/// ciclo (já inclui parcelas, que são transações normais com `accountId`
+/// apontando para o cartão).
+
+final class CreditCardInvoiceProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<CreditCardInvoice>,
+          CreditCardInvoice,
+          FutureOr<CreditCardInvoice>
+        >
+    with
+        $FutureModifier<CreditCardInvoice>,
+        $FutureProvider<CreditCardInvoice> {
+  /// Fatura fechada mais recente de um cartão de crédito: soma das compras do
+  /// ciclo (já inclui parcelas, que são transações normais com `accountId`
+  /// apontando para o cartão).
+  CreditCardInvoiceProvider._({
+    required CreditCardInvoiceFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'creditCardInvoiceProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$creditCardInvoiceHash();
+
+  @override
+  String toString() {
+    return r'creditCardInvoiceProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<CreditCardInvoice> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<CreditCardInvoice> create(Ref ref) {
+    final argument = this.argument as String;
+    return creditCardInvoice(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is CreditCardInvoiceProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$creditCardInvoiceHash() => r'd75c846291484fb5d380b8e36ae779798a35627e';
+
+/// Fatura fechada mais recente de um cartão de crédito: soma das compras do
+/// ciclo (já inclui parcelas, que são transações normais com `accountId`
+/// apontando para o cartão).
+
+final class CreditCardInvoiceFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<CreditCardInvoice>, String> {
+  CreditCardInvoiceFamily._()
+    : super(
+        retry: null,
+        name: r'creditCardInvoiceProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// Fatura fechada mais recente de um cartão de crédito: soma das compras do
+  /// ciclo (já inclui parcelas, que são transações normais com `accountId`
+  /// apontando para o cartão).
+
+  CreditCardInvoiceProvider call(String accountId) =>
+      CreditCardInvoiceProvider._(argument: accountId, from: this);
+
+  @override
+  String toString() => r'creditCardInvoiceProvider';
+}

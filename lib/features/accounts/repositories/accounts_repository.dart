@@ -22,12 +22,14 @@ class AccountsRepository {
     required AccountType type,
     double initialBalance = 0,
     bool isDefault = false,
+    int? closingDay,
   }) {
     return _collection.add({
       'name': name,
       'type': type.name,
       'initialBalance': initialBalance,
       'isDefault': isDefault,
+      'closingDay': closingDay,
     });
   }
 
@@ -37,6 +39,7 @@ class AccountsRepository {
       'type': account.type.name,
       'initialBalance': account.initialBalance,
       'isDefault': account.isDefault,
+      'closingDay': account.closingDay,
     });
   }
 
@@ -52,6 +55,7 @@ class AccountsRepository {
       type: AccountType.values.firstWhere((t) => t.name == data['type'], orElse: () => AccountType.checking),
       initialBalance: (data['initialBalance'] as num?)?.toDouble() ?? 0,
       isDefault: data['isDefault'] as bool? ?? false,
+      closingDay: (data['closingDay'] as num?)?.toInt(),
     );
   }
 }
