@@ -28,6 +28,7 @@ class TransactionsRepository {
     DateTime? dueDate,
     bool isPaid = true,
     String? recurringRuleId,
+    String? accountId,
   }) {
     return _collection.add(_toMap(
       description: description,
@@ -39,6 +40,7 @@ class TransactionsRepository {
       dueDate: dueDate,
       isPaid: isPaid,
       recurringRuleId: recurringRuleId,
+      accountId: accountId,
     ));
   }
 
@@ -55,6 +57,7 @@ class TransactionsRepository {
     required DateTime firstDate,
     required int installmentsCount,
     String? note,
+    String? accountId,
   }) async {
     final groupId = _collection.doc().id;
     final baseAmount = (totalAmount / installmentsCount * 100).round() / 100;
@@ -79,6 +82,7 @@ class TransactionsRepository {
             note: note,
             dueDate: isPaid ? null : installmentDate,
             isPaid: isPaid,
+            accountId: accountId,
           ),
           'installmentGroupId': groupId,
           'installmentIndex': i + 1,
@@ -119,6 +123,7 @@ class TransactionsRepository {
     DateTime? dueDate,
     bool isPaid = true,
     String? recurringRuleId,
+    String? accountId,
   }) {
     return {
       'description': description,
@@ -130,6 +135,7 @@ class TransactionsRepository {
       'dueDate': dueDate == null ? null : Timestamp.fromDate(dueDate),
       'isPaid': isPaid,
       'recurringRuleId': recurringRuleId,
+      'accountId': accountId,
     };
   }
 
@@ -143,6 +149,7 @@ class TransactionsRepository {
       'note': transaction.note,
       'dueDate': transaction.dueDate == null ? null : Timestamp.fromDate(transaction.dueDate!),
       'isPaid': transaction.isPaid,
+      'accountId': transaction.accountId,
     });
   }
 
@@ -166,6 +173,7 @@ class TransactionsRepository {
       installmentGroupId: data['installmentGroupId'] as String?,
       installmentIndex: (data['installmentIndex'] as num?)?.toInt(),
       installmentTotal: (data['installmentTotal'] as num?)?.toInt(),
+      accountId: data['accountId'] as String?,
     );
   }
 }

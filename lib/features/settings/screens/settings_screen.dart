@@ -84,6 +84,12 @@ class SettingsScreen extends ConsumerWidget {
             const Divider(),
             const _SectionLabel('Preferências'),
             ListTile(
+              leading: const Icon(Icons.account_balance_wallet_outlined),
+              title: const Text('Contas e carteiras'),
+              subtitle: const Text('Conta corrente, carteira, cartão de crédito'),
+              onTap: () => context.push('/settings/accounts'),
+            ),
+            ListTile(
               leading: const Icon(Icons.pie_chart_outline),
               title: const Text('Orçamentos'),
               subtitle: const Text('Defina limites mensais por categoria'),

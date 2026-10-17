@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/widgets/responsive_center.dart';
+import '../features/accounts/providers/accounts_provider.dart';
 import '../features/notifications/providers/notifications_provider.dart';
 import '../features/recurring/providers/recurring_rules_provider.dart';
 
@@ -47,6 +48,8 @@ class MainShell extends ConsumerWidget {
     ref.watch(recurringGenerationProvider);
     // Mantém os lembretes de vencimento/metas em dia conforme os dados mudam.
     ref.watch(reminderSchedulingProvider);
+    // Garante que a conta "Principal" exista antes de qualquer tela abrir.
+    ref.watch(ensureDefaultAccountProvider);
     final wide = isWideScreen(context);
 
     return Scaffold(

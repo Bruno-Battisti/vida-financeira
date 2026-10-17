@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/providers/firebase_providers.dart';
+import '../features/accounts/screens/accounts_screen.dart';
 import '../features/auth/screens/auth_screen.dart';
 import '../features/budgets/screens/budgets_screen.dart';
 import '../features/dashboard/screens/dashboard_screen.dart';
@@ -181,6 +182,11 @@ GoRouter createRouter(WidgetRef ref) {
             path: 'budgets',
             parentNavigatorKey: rootNavigatorKey,
             pageBuilder: (context, state) => _slideFadePage(state, const BudgetsScreen()),
+          ),
+          GoRoute(
+            path: 'accounts',
+            parentNavigatorKey: rootNavigatorKey,
+            pageBuilder: (context, state) => _slideFadePage(state, const AccountsScreen()),
           ),
           GoRoute(
             path: 'recurring',

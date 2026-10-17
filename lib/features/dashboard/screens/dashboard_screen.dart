@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/utils/formatters.dart';
+import '../../accounts/providers/accounts_provider.dart';
 import '../../budgets/providers/budgets_provider.dart';
 import '../../transactions/models/transaction.dart';
 import '../../transactions/providers/categories_provider.dart';
@@ -39,6 +40,7 @@ class DashboardScreen extends ConsumerWidget {
         const ExchangeRateCard(),
         const SizedBox(height: 16),
         const _BudgetAlerts(),
+        const _AccountBalancesCard(),
         const _BalanceProjectionCard(),
         const SizedBox(height: 16),
         Row(
@@ -161,6 +163,54 @@ class _BudgetAlerts extends ConsumerWidget {
                   child: Text(
                     '${p.category.name}: ${formatCurrency(p.spent)} de ${formatCurrency(p.budget.monthlyLimit)}',
                     style: TextStyle(color: Theme.of(context).colorScheme.onErrorContainer),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AccountBalancesCard extends ConsumerWidget {
+  const _AccountBalancesCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final balancesAsync = ref.watch(accountBalancesProvider);
+    final balances = switch (balancesAsync) {
+      AsyncData(:final value) => value,
+      _ => const <AccountBalance>[],
+    };
+
+    if (balances.length < 2) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Saldo por conta', style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: 8),
+              for (final item in balances)
+                Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(item.account.name),
+                      Text(
+                        formatCurrency(item.balance),
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: item.balance < 0 ? Colors.red : null,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
             ],

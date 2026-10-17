@@ -23,7 +23,9 @@ mixin _$Transaction {
  String? get recurringRuleId;/// Id compartilhado por todas as parcelas de uma mesma compra parcelada.
  String? get installmentGroupId;/// Posição desta parcela (1-based) dentro do grupo de parcelamento.
  int? get installmentIndex;/// Número total de parcelas do grupo de parcelamento.
- int? get installmentTotal;
+ int? get installmentTotal;/// Conta/carteira dona da transação. `null` em transações antigas,
+/// criadas antes de contas existirem — contam para a conta padrão.
+ String? get accountId;
 /// Create a copy of Transaction
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -35,20 +37,20 @@ $TransactionCopyWith<Transaction> get copyWith => _$TransactionCopyWithImpl<Tran
 @override
 bool operator ==(Object other) {
   final _this = this as Transaction;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Transaction&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.description, _this.description) || other.description == _this.description)&&(identical(other.amount, _this.amount) || other.amount == _this.amount)&&(identical(other.type, _this.type) || other.type == _this.type)&&(identical(other.categoryId, _this.categoryId) || other.categoryId == _this.categoryId)&&(identical(other.date, _this.date) || other.date == _this.date)&&(identical(other.note, _this.note) || other.note == _this.note)&&(identical(other.dueDate, _this.dueDate) || other.dueDate == _this.dueDate)&&(identical(other.isPaid, _this.isPaid) || other.isPaid == _this.isPaid)&&(identical(other.recurringRuleId, _this.recurringRuleId) || other.recurringRuleId == _this.recurringRuleId)&&(identical(other.installmentGroupId, _this.installmentGroupId) || other.installmentGroupId == _this.installmentGroupId)&&(identical(other.installmentIndex, _this.installmentIndex) || other.installmentIndex == _this.installmentIndex)&&(identical(other.installmentTotal, _this.installmentTotal) || other.installmentTotal == _this.installmentTotal));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Transaction&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.description, _this.description) || other.description == _this.description)&&(identical(other.amount, _this.amount) || other.amount == _this.amount)&&(identical(other.type, _this.type) || other.type == _this.type)&&(identical(other.categoryId, _this.categoryId) || other.categoryId == _this.categoryId)&&(identical(other.date, _this.date) || other.date == _this.date)&&(identical(other.note, _this.note) || other.note == _this.note)&&(identical(other.dueDate, _this.dueDate) || other.dueDate == _this.dueDate)&&(identical(other.isPaid, _this.isPaid) || other.isPaid == _this.isPaid)&&(identical(other.recurringRuleId, _this.recurringRuleId) || other.recurringRuleId == _this.recurringRuleId)&&(identical(other.installmentGroupId, _this.installmentGroupId) || other.installmentGroupId == _this.installmentGroupId)&&(identical(other.installmentIndex, _this.installmentIndex) || other.installmentIndex == _this.installmentIndex)&&(identical(other.installmentTotal, _this.installmentTotal) || other.installmentTotal == _this.installmentTotal)&&(identical(other.accountId, _this.accountId) || other.accountId == _this.accountId));
 }
 
 
 @override
 int get hashCode {
   final _this = this as Transaction;
-  return Object.hash(runtimeType,_this.id,_this.description,_this.amount,_this.type,_this.categoryId,_this.date,_this.note,_this.dueDate,_this.isPaid,_this.recurringRuleId,_this.installmentGroupId,_this.installmentIndex,_this.installmentTotal);
+  return Object.hash(runtimeType,_this.id,_this.description,_this.amount,_this.type,_this.categoryId,_this.date,_this.note,_this.dueDate,_this.isPaid,_this.recurringRuleId,_this.installmentGroupId,_this.installmentIndex,_this.installmentTotal,_this.accountId);
 }
 
 @override
 String toString() {
   final _this = this as Transaction;
-  return 'Transaction(id: ${_this.id}, description: ${_this.description}, amount: ${_this.amount}, type: ${_this.type}, categoryId: ${_this.categoryId}, date: ${_this.date}, note: ${_this.note}, dueDate: ${_this.dueDate}, isPaid: ${_this.isPaid}, recurringRuleId: ${_this.recurringRuleId}, installmentGroupId: ${_this.installmentGroupId}, installmentIndex: ${_this.installmentIndex}, installmentTotal: ${_this.installmentTotal})';
+  return 'Transaction(id: ${_this.id}, description: ${_this.description}, amount: ${_this.amount}, type: ${_this.type}, categoryId: ${_this.categoryId}, date: ${_this.date}, note: ${_this.note}, dueDate: ${_this.dueDate}, isPaid: ${_this.isPaid}, recurringRuleId: ${_this.recurringRuleId}, installmentGroupId: ${_this.installmentGroupId}, installmentIndex: ${_this.installmentIndex}, installmentTotal: ${_this.installmentTotal}, accountId: ${_this.accountId})';
 }
 
 
@@ -59,7 +61,7 @@ abstract mixin class $TransactionCopyWith<$Res>  {
   factory $TransactionCopyWith(Transaction value, $Res Function(Transaction) _then) = _$TransactionCopyWithImpl;
 @useResult
 $Res call({
- String id, String description, double amount, TransactionType type, int categoryId, DateTime date, String? note, DateTime? dueDate, bool isPaid, String? recurringRuleId, String? installmentGroupId, int? installmentIndex, int? installmentTotal
+ String id, String description, double amount, TransactionType type, int categoryId, DateTime date, String? note, DateTime? dueDate, bool isPaid, String? recurringRuleId, String? installmentGroupId, int? installmentIndex, int? installmentTotal, String? accountId
 });
 
 
@@ -76,7 +78,7 @@ class _$TransactionCopyWithImpl<$Res>
 
 /// Create a copy of Transaction
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? description = null,Object? amount = null,Object? type = null,Object? categoryId = null,Object? date = null,Object? note = freezed,Object? dueDate = freezed,Object? isPaid = null,Object? recurringRuleId = freezed,Object? installmentGroupId = freezed,Object? installmentIndex = freezed,Object? installmentTotal = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? description = null,Object? amount = null,Object? type = null,Object? categoryId = null,Object? date = null,Object? note = freezed,Object? dueDate = freezed,Object? isPaid = null,Object? recurringRuleId = freezed,Object? installmentGroupId = freezed,Object? installmentIndex = freezed,Object? installmentTotal = freezed,Object? accountId = freezed,}) {
   return _then(Transaction(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
@@ -91,7 +93,8 @@ as bool,recurringRuleId: freezed == recurringRuleId ? _self.recurringRuleId : re
 as String?,installmentGroupId: freezed == installmentGroupId ? _self.installmentGroupId : installmentGroupId // ignore: cast_nullable_to_non_nullable
 as String?,installmentIndex: freezed == installmentIndex ? _self.installmentIndex : installmentIndex // ignore: cast_nullable_to_non_nullable
 as int?,installmentTotal: freezed == installmentTotal ? _self.installmentTotal : installmentTotal // ignore: cast_nullable_to_non_nullable
-as int?,
+as int?,accountId: freezed == accountId ? _self.accountId : accountId // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
@@ -176,10 +179,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String description,  double amount,  TransactionType type,  int categoryId,  DateTime date,  String? note,  DateTime? dueDate,  bool isPaid,  String? recurringRuleId,  String? installmentGroupId,  int? installmentIndex,  int? installmentTotal)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String description,  double amount,  TransactionType type,  int categoryId,  DateTime date,  String? note,  DateTime? dueDate,  bool isPaid,  String? recurringRuleId,  String? installmentGroupId,  int? installmentIndex,  int? installmentTotal,  String? accountId)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Transaction() when $default != null:
-return $default(_that.id,_that.description,_that.amount,_that.type,_that.categoryId,_that.date,_that.note,_that.dueDate,_that.isPaid,_that.recurringRuleId,_that.installmentGroupId,_that.installmentIndex,_that.installmentTotal);case _:
+return $default(_that.id,_that.description,_that.amount,_that.type,_that.categoryId,_that.date,_that.note,_that.dueDate,_that.isPaid,_that.recurringRuleId,_that.installmentGroupId,_that.installmentIndex,_that.installmentTotal,_that.accountId);case _:
   return orElse();
 
 }
@@ -197,10 +200,10 @@ return $default(_that.id,_that.description,_that.amount,_that.type,_that.categor
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String description,  double amount,  TransactionType type,  int categoryId,  DateTime date,  String? note,  DateTime? dueDate,  bool isPaid,  String? recurringRuleId,  String? installmentGroupId,  int? installmentIndex,  int? installmentTotal)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String description,  double amount,  TransactionType type,  int categoryId,  DateTime date,  String? note,  DateTime? dueDate,  bool isPaid,  String? recurringRuleId,  String? installmentGroupId,  int? installmentIndex,  int? installmentTotal,  String? accountId)  $default,) {final _that = this;
 switch (_that) {
 case _Transaction():
-return $default(_that.id,_that.description,_that.amount,_that.type,_that.categoryId,_that.date,_that.note,_that.dueDate,_that.isPaid,_that.recurringRuleId,_that.installmentGroupId,_that.installmentIndex,_that.installmentTotal);case _:
+return $default(_that.id,_that.description,_that.amount,_that.type,_that.categoryId,_that.date,_that.note,_that.dueDate,_that.isPaid,_that.recurringRuleId,_that.installmentGroupId,_that.installmentIndex,_that.installmentTotal,_that.accountId);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -217,10 +220,10 @@ return $default(_that.id,_that.description,_that.amount,_that.type,_that.categor
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String description,  double amount,  TransactionType type,  int categoryId,  DateTime date,  String? note,  DateTime? dueDate,  bool isPaid,  String? recurringRuleId,  String? installmentGroupId,  int? installmentIndex,  int? installmentTotal)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String description,  double amount,  TransactionType type,  int categoryId,  DateTime date,  String? note,  DateTime? dueDate,  bool isPaid,  String? recurringRuleId,  String? installmentGroupId,  int? installmentIndex,  int? installmentTotal,  String? accountId)?  $default,) {final _that = this;
 switch (_that) {
 case _Transaction() when $default != null:
-return $default(_that.id,_that.description,_that.amount,_that.type,_that.categoryId,_that.date,_that.note,_that.dueDate,_that.isPaid,_that.recurringRuleId,_that.installmentGroupId,_that.installmentIndex,_that.installmentTotal);case _:
+return $default(_that.id,_that.description,_that.amount,_that.type,_that.categoryId,_that.date,_that.note,_that.dueDate,_that.isPaid,_that.recurringRuleId,_that.installmentGroupId,_that.installmentIndex,_that.installmentTotal,_that.accountId);case _:
   return null;
 
 }
@@ -232,7 +235,7 @@ return $default(_that.id,_that.description,_that.amount,_that.type,_that.categor
 
 
 class _Transaction implements Transaction {
-  const _Transaction({required this.id, required this.description, required this.amount, required this.type, required this.categoryId, required this.date, this.note, this.dueDate, this.isPaid = true, this.recurringRuleId, this.installmentGroupId, this.installmentIndex, this.installmentTotal});
+  const _Transaction({required this.id, required this.description, required this.amount, required this.type, required this.categoryId, required this.date, this.note, this.dueDate, this.isPaid = true, this.recurringRuleId, this.installmentGroupId, this.installmentIndex, this.installmentTotal, this.accountId});
   
 
 @override final  String id;
@@ -256,6 +259,9 @@ class _Transaction implements Transaction {
 @override final  int? installmentIndex;
 /// Número total de parcelas do grupo de parcelamento.
 @override final  int? installmentTotal;
+/// Conta/carteira dona da transação. `null` em transações antigas,
+/// criadas antes de contas existirem — contam para a conta padrão.
+@override final  String? accountId;
 
 /// Create a copy of Transaction
 /// with the given fields replaced by the non-null parameter values.
@@ -267,18 +273,18 @@ _$TransactionCopyWith<_Transaction> get copyWith => __$TransactionCopyWithImpl<_
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Transaction&&(identical(other.id, id) || other.id == id)&&(identical(other.description, description) || other.description == description)&&(identical(other.amount, amount) || other.amount == amount)&&(identical(other.type, type) || other.type == type)&&(identical(other.categoryId, categoryId) || other.categoryId == categoryId)&&(identical(other.date, date) || other.date == date)&&(identical(other.note, note) || other.note == note)&&(identical(other.dueDate, dueDate) || other.dueDate == dueDate)&&(identical(other.isPaid, isPaid) || other.isPaid == isPaid)&&(identical(other.recurringRuleId, recurringRuleId) || other.recurringRuleId == recurringRuleId)&&(identical(other.installmentGroupId, installmentGroupId) || other.installmentGroupId == installmentGroupId)&&(identical(other.installmentIndex, installmentIndex) || other.installmentIndex == installmentIndex)&&(identical(other.installmentTotal, installmentTotal) || other.installmentTotal == installmentTotal));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Transaction&&(identical(other.id, id) || other.id == id)&&(identical(other.description, description) || other.description == description)&&(identical(other.amount, amount) || other.amount == amount)&&(identical(other.type, type) || other.type == type)&&(identical(other.categoryId, categoryId) || other.categoryId == categoryId)&&(identical(other.date, date) || other.date == date)&&(identical(other.note, note) || other.note == note)&&(identical(other.dueDate, dueDate) || other.dueDate == dueDate)&&(identical(other.isPaid, isPaid) || other.isPaid == isPaid)&&(identical(other.recurringRuleId, recurringRuleId) || other.recurringRuleId == recurringRuleId)&&(identical(other.installmentGroupId, installmentGroupId) || other.installmentGroupId == installmentGroupId)&&(identical(other.installmentIndex, installmentIndex) || other.installmentIndex == installmentIndex)&&(identical(other.installmentTotal, installmentTotal) || other.installmentTotal == installmentTotal)&&(identical(other.accountId, accountId) || other.accountId == accountId));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,description,amount,type,categoryId,date,note,dueDate,isPaid,recurringRuleId,installmentGroupId,installmentIndex,installmentTotal);
+    return Object.hash(runtimeType,id,description,amount,type,categoryId,date,note,dueDate,isPaid,recurringRuleId,installmentGroupId,installmentIndex,installmentTotal,accountId);
 }
 
 @override
 String toString() {
-    return 'Transaction(id: $id, description: $description, amount: $amount, type: $type, categoryId: $categoryId, date: $date, note: $note, dueDate: $dueDate, isPaid: $isPaid, recurringRuleId: $recurringRuleId, installmentGroupId: $installmentGroupId, installmentIndex: $installmentIndex, installmentTotal: $installmentTotal)';
+    return 'Transaction(id: $id, description: $description, amount: $amount, type: $type, categoryId: $categoryId, date: $date, note: $note, dueDate: $dueDate, isPaid: $isPaid, recurringRuleId: $recurringRuleId, installmentGroupId: $installmentGroupId, installmentIndex: $installmentIndex, installmentTotal: $installmentTotal, accountId: $accountId)';
 }
 
 
@@ -289,7 +295,7 @@ abstract mixin class _$TransactionCopyWith<$Res> implements $TransactionCopyWith
   factory _$TransactionCopyWith(_Transaction value, $Res Function(_Transaction) _then) = __$TransactionCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String description, double amount, TransactionType type, int categoryId, DateTime date, String? note, DateTime? dueDate, bool isPaid, String? recurringRuleId, String? installmentGroupId, int? installmentIndex, int? installmentTotal
+ String id, String description, double amount, TransactionType type, int categoryId, DateTime date, String? note, DateTime? dueDate, bool isPaid, String? recurringRuleId, String? installmentGroupId, int? installmentIndex, int? installmentTotal, String? accountId
 });
 
 
@@ -306,7 +312,7 @@ class __$TransactionCopyWithImpl<$Res>
 
 /// Create a copy of Transaction
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? description = null,Object? amount = null,Object? type = null,Object? categoryId = null,Object? date = null,Object? note = freezed,Object? dueDate = freezed,Object? isPaid = null,Object? recurringRuleId = freezed,Object? installmentGroupId = freezed,Object? installmentIndex = freezed,Object? installmentTotal = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? description = null,Object? amount = null,Object? type = null,Object? categoryId = null,Object? date = null,Object? note = freezed,Object? dueDate = freezed,Object? isPaid = null,Object? recurringRuleId = freezed,Object? installmentGroupId = freezed,Object? installmentIndex = freezed,Object? installmentTotal = freezed,Object? accountId = freezed,}) {
   return _then(_Transaction(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
@@ -321,7 +327,8 @@ as bool,recurringRuleId: freezed == recurringRuleId ? _self.recurringRuleId : re
 as String?,installmentGroupId: freezed == installmentGroupId ? _self.installmentGroupId : installmentGroupId // ignore: cast_nullable_to_non_nullable
 as String?,installmentIndex: freezed == installmentIndex ? _self.installmentIndex : installmentIndex // ignore: cast_nullable_to_non_nullable
 as int?,installmentTotal: freezed == installmentTotal ? _self.installmentTotal : installmentTotal // ignore: cast_nullable_to_non_nullable
-as int?,
+as int?,accountId: freezed == accountId ? _self.accountId : accountId // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

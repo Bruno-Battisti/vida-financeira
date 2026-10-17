@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/responsive_center.dart';
+import '../../accounts/models/account.dart';
+import '../../accounts/providers/accounts_provider.dart';
 import '../models/category.dart';
 import '../models/transaction.dart';
 import '../providers/categories_provider.dart';
@@ -38,6 +40,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
   bool _isPending = false;
   DateTime? _dueDate;
   bool _isInstallment = false;
+  Account? _account;
 
   @override
   void dispose() {
@@ -99,6 +102,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
               firstDate: _date,
               installmentsCount: int.parse(_installmentsController.text.trim()),
               note: note.isEmpty ? null : note,
+              accountId: _account?.id,
             );
       } else {
         await ref.read(transactionsRepositoryProvider).add(
@@ -110,6 +114,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
               note: note.isEmpty ? null : note,
               isPaid: !_isPending,
               dueDate: _isPending ? _dueDate : null,
+              accountId: _account?.id,
             );
       }
       if (mounted) {
@@ -125,9 +130,25 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
     }
   }
 
+  String _accountLabel(Account account) {
+    switch (account.type) {
+      case AccountType.checking:
+        return '${account.name} · Conta corrente';
+      case AccountType.wallet:
+        return '${account.name} · Carteira';
+      case AccountType.creditCard:
+        return '${account.name} · Cartão de crédito';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final categoriesAsync = ref.watch(categoriesProvider);
+    final accountsAsync = ref.watch(accountsProvider);
+    final accounts = accountsAsync.value ?? const <Account>[];
+    if (_account == null && accounts.isNotEmpty) {
+      _account = accounts.firstWhere((a) => a.isDefault, orElse: () => accounts.first);
+    }
 
     return Scaffold(
       appBar: AppBar(title: const Text('Nova transação')),
@@ -217,6 +238,18 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                     validator: (value) =>
                         value == null ? 'Selecione uma categoria.' : null,
                   ),
+                  if (accounts.length > 1) ...[
+                    const SizedBox(height: 16),
+                    DropdownButtonFormField<Account>(
+                      initialValue: _account,
+                      decoration: const InputDecoration(labelText: 'Conta'),
+                      items: accounts
+                          .map((account) => DropdownMenuItem(
+                              value: account, child: Text(_accountLabel(account))))
+                          .toList(),
+                      onChanged: (value) => setState(() => _account = value),
+                    ),
+                  ],
                   const SizedBox(height: 16),
                   ListTile(
                     contentPadding: EdgeInsets.zero,

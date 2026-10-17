@@ -28,5 +28,8 @@ abstract class Transaction with _$Transaction {
     int? installmentIndex,
     /// Número total de parcelas do grupo de parcelamento.
     int? installmentTotal,
+    /// Conta/carteira dona da transação. `null` em transações antigas,
+    /// criadas antes de contas existirem — contam para a conta padrão.
+    String? accountId,
   }) = _Transaction;
 }
