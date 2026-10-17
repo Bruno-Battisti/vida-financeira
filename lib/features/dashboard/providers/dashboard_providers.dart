@@ -18,13 +18,16 @@ Future<DashboardSummary> dashboardSummary(Ref ref) async {
   final transactions = await ref.watch(transactionsProvider.future);
   final now = DateTime.now();
 
-  final monthTransactions = transactions
+  // Contas a pagar/receber pendentes só entram nos totais quando pagas —
+  // até lá elas são só um compromisso futuro, não dinheiro já movimentado.
+  final settled = transactions.where((t) => t.isPaid).toList();
+  final monthTransactions = settled
       .where((t) => t.date.year == now.year && t.date.month == now.month)
       .toList();
 
   return (
-    saldo: _sumByType(transactions, TransactionType.income) -
-        _sumByType(transactions, TransactionType.expense),
+    saldo: _sumByType(settled, TransactionType.income) -
+        _sumByType(settled, TransactionType.expense),
     receitasDoMes: _sumByType(monthTransactions, TransactionType.income),
     despesasDoMes: _sumByType(monthTransactions, TransactionType.expense),
     gastosPorCategoriaDoMes: _expenseTotalsByCategory(monthTransactions),

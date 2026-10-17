@@ -74,4 +74,34 @@ void main() {
     expect(summary.saldo, 700);
     expect(summary.receitasDoMes, 200);
   });
+
+  test('dashboardSummaryProvider ignora contas pendentes (isPaid: false) no saldo', () async {
+    final container = _containerWithEmptyFirestore();
+
+    final repository = container.read(transactionsRepositoryProvider);
+    final now = DateTime.now();
+
+    await repository.add(
+      description: 'Salário',
+      amount: 1000,
+      type: TransactionType.income,
+      categoryId: 10,
+      date: now,
+    );
+    await repository.add(
+      description: 'Conta de luz (a pagar)',
+      amount: 300,
+      type: TransactionType.expense,
+      categoryId: 3,
+      date: now,
+      isPaid: false,
+      dueDate: now.add(const Duration(days: 5)),
+    );
+
+    final summary = await container.read(dashboardSummaryProvider.future);
+
+    expect(summary.saldo, 1000);
+    expect(summary.despesasDoMes, 0);
+    expect(summary.ultimasTransacoes, hasLength(2));
+  });
 }

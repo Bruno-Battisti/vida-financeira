@@ -37,6 +37,7 @@ Future<List<BudgetProgress>> budgetProgress(Ref ref) async {
   final now = DateTime.now();
   final spentByCategory = <int, double>{};
   for (final t in transactions) {
+    if (!t.isPaid) continue;
     if (t.type != TransactionType.expense) continue;
     if (t.date.year != now.year || t.date.month != now.month) continue;
     spentByCategory.update(t.categoryId, (v) => v + t.amount, ifAbsent: () => t.amount);

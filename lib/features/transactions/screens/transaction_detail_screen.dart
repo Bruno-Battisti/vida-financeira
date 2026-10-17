@@ -13,6 +13,23 @@ class TransactionDetailScreen extends ConsumerWidget {
 
   final String transactionId;
 
+  Future<void> _markAsPaid(BuildContext context, WidgetRef ref, Transaction transaction) async {
+    try {
+      await ref.read(transactionsRepositoryProvider).update(transaction.copyWith(isPaid: true));
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Transação marcada como paga.')),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Não foi possível atualizar: $e')),
+        );
+      }
+    }
+  }
+
   Future<void> _confirmDelete(BuildContext context, WidgetRef ref) async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -121,6 +138,20 @@ class TransactionDetailScreen extends ConsumerWidget {
                             title: const Text('Data'),
                             subtitle: Text(formatDate(transaction.date)),
                           ),
+                          if (!transaction.isPaid)
+                            ListTile(
+                              leading: const Icon(Icons.pending_actions_outlined),
+                              title: const Text('Status'),
+                              subtitle: Text(
+                                transaction.dueDate == null
+                                    ? 'Pendente'
+                                    : 'Pendente · vence em ${formatDate(transaction.dueDate!)}',
+                              ),
+                              trailing: TextButton(
+                                onPressed: () => _markAsPaid(context, ref, transaction),
+                                child: const Text('Marcar como paga'),
+                              ),
+                            ),
                           if (transaction.note != null &&
                               transaction.note!.isNotEmpty)
                             ListTile(

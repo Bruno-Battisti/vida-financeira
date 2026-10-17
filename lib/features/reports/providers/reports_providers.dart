@@ -48,9 +48,13 @@ double? percentChange(double current, double previous) {
 
 @riverpod
 Future<ReportsData> reportsData(Ref ref) async {
-  final transactions = await ref.watch(transactionsProvider.future);
+  final allTransactions = await ref.watch(transactionsProvider.future);
   final categories = await ref.watch(categoriesProvider.future);
   final categoryMap = {for (final c in categories) c.id: c};
+
+  // Contas a pagar/receber pendentes não entram nos relatórios até serem
+  // pagas, consistente com o saldo do Dashboard.
+  final transactions = allTransactions.where((t) => t.isPaid).toList();
 
   final totalIncome = transactions
       .where((t) => t.type == TransactionType.income)

@@ -85,6 +85,54 @@ void main() {
     expect(transactions, isEmpty);
   });
 
+  test('add() sem isPaid/dueDate cria uma transação já paga', () async {
+    await repository.add(
+      description: 'Compra à vista',
+      amount: 10,
+      type: TransactionType.expense,
+      categoryId: 1,
+      date: DateTime(2026, 1, 1),
+    );
+
+    final transaction = (await repository.watchAll().first).first;
+    expect(transaction.isPaid, isTrue);
+    expect(transaction.dueDate, isNull);
+  });
+
+  test('add() com isPaid: false e dueDate cria uma conta pendente', () async {
+    await repository.add(
+      description: 'Conta de luz',
+      amount: 150,
+      type: TransactionType.expense,
+      categoryId: 3,
+      date: DateTime(2026, 1, 1),
+      isPaid: false,
+      dueDate: DateTime(2026, 1, 10),
+    );
+
+    final transaction = (await repository.watchAll().first).first;
+    expect(transaction.isPaid, isFalse);
+    expect(transaction.dueDate, DateTime(2026, 1, 10));
+  });
+
+  test('update() permite marcar uma conta pendente como paga', () async {
+    await repository.add(
+      description: 'Conta de luz',
+      amount: 150,
+      type: TransactionType.expense,
+      categoryId: 3,
+      date: DateTime(2026, 1, 1),
+      isPaid: false,
+      dueDate: DateTime(2026, 1, 10),
+    );
+    final pending = (await repository.watchAll().first).first;
+
+    await repository.update(pending.copyWith(isPaid: true));
+
+    final updated = (await repository.watchAll().first).first;
+    expect(updated.isPaid, isTrue);
+  });
+
   test('cada usuário só vê as próprias transações', () async {
     final otherUserRepo = TransactionsRepository(firestore, 'user-2');
 

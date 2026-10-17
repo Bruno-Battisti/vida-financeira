@@ -255,6 +255,9 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
         final transaction = transactions[index];
         final category = categoryMap[transaction.categoryId];
         final isIncome = transaction.type == TransactionType.income;
+        final isOverdue = !transaction.isPaid &&
+            transaction.dueDate != null &&
+            transaction.dueDate!.isBefore(DateTime.now());
 
         return Card(
           margin: const EdgeInsets.only(bottom: 8),
@@ -264,7 +267,14 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
               child: CircleAvatar(child: Icon(category?.icon ?? Icons.category)),
             ),
             title: Text(transaction.description),
-            subtitle: Text('${category?.name ?? 'Categoria'} · ${formatDate(transaction.date)}'),
+            subtitle: Text(
+              transaction.isPaid
+                  ? '${category?.name ?? 'Categoria'} · ${formatDate(transaction.date)}'
+                  : '${category?.name ?? 'Categoria'} · '
+                      '${isOverdue ? 'Atrasada' : 'Pendente'} · '
+                      'vence em ${formatDate(transaction.dueDate!)}',
+              style: isOverdue ? const TextStyle(color: Colors.red) : null,
+            ),
             trailing: Text(
               '${isIncome ? '+' : '-'} ${formatCurrency(transaction.amount)}',
               style: TextStyle(

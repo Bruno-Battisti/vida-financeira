@@ -25,6 +25,8 @@ class TransactionsRepository {
     required int categoryId,
     required DateTime date,
     String? note,
+    DateTime? dueDate,
+    bool isPaid = true,
   }) {
     return _collection.add(_toMap(
       description: description,
@@ -33,6 +35,8 @@ class TransactionsRepository {
       categoryId: categoryId,
       date: date,
       note: note,
+      dueDate: dueDate,
+      isPaid: isPaid,
     ));
   }
 
@@ -48,6 +52,8 @@ class TransactionsRepository {
           categoryId: row.categoryId,
           date: row.date,
           note: row.note,
+          dueDate: null,
+          isPaid: true,
         ),
       );
     }
@@ -61,6 +67,8 @@ class TransactionsRepository {
     required int categoryId,
     required DateTime date,
     String? note,
+    DateTime? dueDate,
+    bool isPaid = true,
   }) {
     return {
       'description': description,
@@ -69,6 +77,8 @@ class TransactionsRepository {
       'categoryId': categoryId,
       'date': Timestamp.fromDate(date),
       'note': note,
+      'dueDate': dueDate == null ? null : Timestamp.fromDate(dueDate),
+      'isPaid': isPaid,
     };
   }
 
@@ -80,6 +90,8 @@ class TransactionsRepository {
       'categoryId': transaction.categoryId,
       'date': Timestamp.fromDate(transaction.date),
       'note': transaction.note,
+      'dueDate': transaction.dueDate == null ? null : Timestamp.fromDate(transaction.dueDate!),
+      'isPaid': transaction.isPaid,
     });
   }
 
@@ -97,6 +109,8 @@ class TransactionsRepository {
       categoryId: data['categoryId'] as int,
       date: (data['date'] as Timestamp).toDate(),
       note: data['note'] as String?,
+      dueDate: (data['dueDate'] as Timestamp?)?.toDate(),
+      isPaid: data['isPaid'] as bool? ?? true,
     );
   }
 }

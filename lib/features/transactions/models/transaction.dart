@@ -14,5 +14,10 @@ abstract class Transaction with _$Transaction {
     required int categoryId,
     required DateTime date,
     String? note,
+    /// Data de vencimento de uma conta a pagar/receber ainda pendente.
+    DateTime? dueDate,
+    /// `false` representa uma conta a pagar/receber que ainda não foi
+    /// liquidada — só entra nos totais e saldos quando marcada como paga.
+    @Default(true) bool isPaid,
   }) = _Transaction;
 }

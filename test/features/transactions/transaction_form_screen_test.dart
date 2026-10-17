@@ -24,6 +24,11 @@ void main() {
 
     expect(find.text('Nova transação'), findsOneWidget);
 
+    await tester.dragUntilVisible(
+      find.text('Salvar'),
+      find.descendant(of: find.byType(Form), matching: find.byType(ListView)),
+      const Offset(0, -200),
+    );
     await tester.tap(find.text('Salvar'));
     await tester.pumpAndSettle();
 
@@ -54,6 +59,11 @@ void main() {
     await tester.tap(find.text('Alimentação').last);
     await tester.pumpAndSettle();
 
+    await tester.dragUntilVisible(
+      find.text('Salvar'),
+      find.descendant(of: find.byType(Form), matching: find.byType(ListView)),
+      const Offset(0, -200),
+    );
     await tester.tap(find.text('Salvar'));
     await tester.pumpAndSettle();
 

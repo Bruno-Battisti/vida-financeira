@@ -139,4 +139,4 @@ final class BudgetProgressProvider
   }
 }
 
-String _$budgetProgressHash() => r'aca30e8a52f72bc38beacce792dafc56312a155a';
+String _$budgetProgressHash() => r'f3a4f6fa14412c75ce48e2ab75b9c5eb9d2d9f09';

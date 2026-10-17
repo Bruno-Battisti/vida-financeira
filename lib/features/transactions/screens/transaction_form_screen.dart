@@ -34,6 +34,8 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
   late Category? _category = widget.prefillCategory;
   DateTime _date = DateTime.now();
   bool _saving = false;
+  bool _isPending = false;
+  DateTime? _dueDate;
 
   @override
   void dispose() {
@@ -55,8 +57,26 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
     }
   }
 
+  Future<void> _pickDueDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _dueDate ?? _date,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2100),
+    );
+    if (picked != null) {
+      setState(() => _dueDate = picked);
+    }
+  }
+
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) {
+      return;
+    }
+    if (_isPending && _dueDate == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Informe a data de vencimento.')),
+      );
       return;
     }
 
@@ -74,6 +94,8 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
             categoryId: _category!.id,
             date: _date,
             note: note.isEmpty ? null : note,
+            isPaid: !_isPending,
+            dueDate: _isPending ? _dueDate : null,
           );
       if (mounted) {
         context.pop(true);
@@ -186,6 +208,25 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                     trailing: const Icon(Icons.calendar_today_outlined),
                     onTap: _pickDate,
                   ),
+                  const SizedBox(height: 16),
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text('Conta a pagar/receber'),
+                    subtitle: const Text('Ainda não foi paga ou recebida'),
+                    value: _isPending,
+                    onChanged: (value) => setState(() {
+                      _isPending = value;
+                      if (!value) _dueDate = null;
+                    }),
+                  ),
+                  if (_isPending)
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('Vencimento'),
+                      subtitle: Text(_dueDate == null ? 'Selecione a data' : formatDate(_dueDate!)),
+                      trailing: const Icon(Icons.event_outlined),
+                      onTap: _pickDueDate,
+                    ),
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _noteController,
