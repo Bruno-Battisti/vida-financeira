@@ -1,6 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/providers/firebase_providers.dart';
+import '../../household/providers/household_provider.dart';
 import '../../transactions/models/transaction.dart';
 import '../../transactions/providers/transactions_provider.dart';
 import '../models/account.dart';
@@ -12,7 +13,7 @@ part 'accounts_provider.g.dart';
 
 @riverpod
 TransfersRepository transfersRepository(Ref ref) {
-  final uid = ref.watch(authStateProvider).value?.uid;
+  final uid = ref.watch(effectiveOwnerUidProvider);
   if (uid == null) {
     throw StateError('transfersRepositoryProvider requer um usuário autenticado.');
   }
@@ -26,7 +27,7 @@ Stream<List<Transfer>> transfers(Ref ref) {
 
 @riverpod
 AccountsRepository accountsRepository(Ref ref) {
-  final uid = ref.watch(authStateProvider).value?.uid;
+  final uid = ref.watch(effectiveOwnerUidProvider);
   if (uid == null) {
     throw StateError('accountsRepositoryProvider requer um usuário autenticado.');
   }

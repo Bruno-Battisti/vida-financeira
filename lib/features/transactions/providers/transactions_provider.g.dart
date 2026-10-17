@@ -55,7 +55,7 @@ final class TransactionsRepositoryProvider
 }
 
 String _$transactionsRepositoryHash() =>
-    r'58a98d2beb294787d6c636c9ad58190a0382163e';
+    r'55cf6f539803788eb13b9e63c04c847c6956432a';
 
 @ProviderFor(transactions)
 final transactionsProvider = TransactionsProvider._();

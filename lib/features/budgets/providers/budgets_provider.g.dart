@@ -54,7 +54,7 @@ final class BudgetsRepositoryProvider
   }
 }
 
-String _$budgetsRepositoryHash() => r'daf35a30a25cd56685845512d42081b2e17ca4d9';
+String _$budgetsRepositoryHash() => r'45e5d8ae7f2a0362419aec8739a705dec695db17';
 
 @ProviderFor(budgets)
 final budgetsProvider = BudgetsProvider._();

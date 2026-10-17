@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../core/widgets/responsive_center.dart';
 import '../features/accounts/providers/accounts_provider.dart';
+import '../features/household/providers/household_provider.dart';
 import '../features/notifications/providers/notifications_provider.dart';
 import '../features/recurring/providers/recurring_rules_provider.dart';
 
@@ -45,6 +46,9 @@ class MainShell extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // Dispara, uma única vez por sessão, a geração de transações de
     // recorrências já vencidas (ver recurringGenerationProvider).
+    // Garante que o usuário tenha um household (solo, por padrão) antes de
+    // qualquer repositório tentar resolver o uid efetivo dos dados.
+    ref.watch(ensureHouseholdProvider);
     ref.watch(recurringGenerationProvider);
     // Mantém os lembretes de vencimento/metas em dia conforme os dados mudam.
     ref.watch(reminderSchedulingProvider);

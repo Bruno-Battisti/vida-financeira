@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:local_auth/local_auth.dart';
@@ -10,6 +11,8 @@ import 'package:share_plus/share_plus.dart';
 import '../../../app/theme_mode_provider.dart';
 import '../../../core/providers/firebase_providers.dart';
 import '../../../core/widgets/responsive_center.dart';
+import '../../household/models/household.dart';
+import '../../household/providers/household_provider.dart';
 import '../../notifications/providers/notifications_provider.dart';
 import '../../security/providers/app_lock_provider.dart';
 import '../../transactions/providers/categories_provider.dart';
@@ -27,6 +30,7 @@ class SettingsScreen extends ConsumerWidget {
     final user = ref.watch(firebaseAuthProvider).currentUser;
     final lockState = ref.watch(appLockProvider);
     final remindersEnabled = ref.watch(remindersEnabledProvider);
+    final householdAsync = ref.watch(householdProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Configurações')),
@@ -114,6 +118,9 @@ class SettingsScreen extends ConsumerWidget {
               value: remindersEnabled,
               onChanged: (value) => ref.read(remindersEnabledProvider.notifier).setEnabled(value),
             ),
+            const Divider(),
+            const _SectionLabel('Compartilhamento'),
+            _HouseholdSection(householdAsync: householdAsync, myUid: user?.uid),
             const Divider(),
             const _SectionLabel('Dados'),
             ListTile(
@@ -364,6 +371,105 @@ class SettingsScreen extends ConsumerWidget {
       applicationVersion: 'v0.1 — Protótipo',
       applicationLegalese: 'Projeto de aprendizado de Flutter e Dart.',
     );
+  }
+}
+
+class _HouseholdSection extends ConsumerWidget {
+  const _HouseholdSection({required this.householdAsync, required this.myUid});
+
+  final AsyncValue<Household?> householdAsync;
+  final String? myUid;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final household = switch (householdAsync) {
+      AsyncData(:final value) => value,
+      _ => null,
+    };
+    final isOwner = household == null || household.ownerUid == myUid;
+
+    return Column(
+      children: [
+        if (isOwner) ...[
+          ListTile(
+            leading: const Icon(Icons.group_add_outlined),
+            title: const Text('Convidar alguém'),
+            subtitle: Text('Compartilhe este código: ${myUid ?? ''}'),
+            trailing: IconButton(
+              icon: const Icon(Icons.copy_outlined),
+              tooltip: 'Copiar código',
+              onPressed: myUid == null
+                  ? null
+                  : () {
+                      Clipboard.setData(ClipboardData(text: myUid!));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Código copiado!')),
+                      );
+                    },
+            ),
+          ),
+          if (household != null && household.memberUids.length > 1)
+            ListTile(
+              leading: const Icon(Icons.groups_outlined),
+              title: Text('${household.memberUids.length} pessoas compartilhando seus dados'),
+            ),
+        ] else
+          ListTile(
+            leading: const Icon(Icons.groups_outlined),
+            title: const Text('Household compartilhado'),
+            subtitle: Text('Você está vendo os dados de ${household.ownerUid}'),
+            trailing: TextButton(
+              onPressed: () => ref.read(householdsRepositoryProvider).leave(myUid!),
+              child: const Text('Sair'),
+            ),
+          ),
+        ListTile(
+          leading: const Icon(Icons.vpn_key_outlined),
+          title: const Text('Entrar com um código'),
+          subtitle: const Text('Passa a ver os mesmos dados de quem convidou'),
+          onTap: () => _joinHousehold(context, ref),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _joinHousehold(BuildContext context, WidgetRef ref) async {
+    final controller = TextEditingController();
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Entrar em um household'),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(labelText: 'Código de convite'),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Cancelar')),
+          FilledButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('Entrar')),
+        ],
+      ),
+    );
+
+    if (confirmed == true && myUid != null && controller.text.trim().isNotEmpty) {
+      try {
+        await ref.read(householdsRepositoryProvider).join(
+              myUid: myUid!,
+              inviteCode: controller.text.trim(),
+            );
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Agora você compartilha os dados desse household!')),
+          );
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Não foi possível entrar: $e')),
+          );
+        }
+      }
+    }
+    controller.dispose();
   }
 }
 

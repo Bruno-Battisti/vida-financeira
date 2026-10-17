@@ -55,7 +55,7 @@ final class RecurringRulesRepositoryProvider
 }
 
 String _$recurringRulesRepositoryHash() =>
-    r'418a65c5e121e620dc12ae0350ab92aac0b6f9fb';
+    r'2aa5dbed5ab46a921ebf27297af212340a1cbca6';
 
 @ProviderFor(recurringRules)
 final recurringRulesProvider = RecurringRulesProvider._();

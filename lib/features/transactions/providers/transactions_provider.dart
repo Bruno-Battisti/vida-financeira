@@ -1,6 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/providers/firebase_providers.dart';
+import '../../household/providers/household_provider.dart';
 import '../models/transaction.dart';
 import '../repositories/transactions_repository.dart';
 
@@ -8,7 +9,7 @@ part 'transactions_provider.g.dart';
 
 @riverpod
 TransactionsRepository transactionsRepository(Ref ref) {
-  final uid = ref.watch(authStateProvider).value?.uid;
+  final uid = ref.watch(effectiveOwnerUidProvider);
   if (uid == null) {
     throw StateError('transactionsRepositoryProvider requer um usuário autenticado.');
   }

@@ -55,7 +55,7 @@ final class TransfersRepositoryProvider
 }
 
 String _$transfersRepositoryHash() =>
-    r'be45cc5a10e6b26023640a05212b7f6d06b4b77e';
+    r'0bacfb8de6c1cbdf81b49a58ef2028331b80b52c';
 
 @ProviderFor(transfers)
 final transfersProvider = TransfersProvider._();
@@ -142,7 +142,7 @@ final class AccountsRepositoryProvider
 }
 
 String _$accountsRepositoryHash() =>
-    r'dd4cbb1b1e1db3d365c594a9f98f7dfc02068ff6';
+    r'c340aa7742b07a28d0c75b338eea06e2e65bb27e';
 
 @ProviderFor(accounts)
 final accountsProvider = AccountsProvider._();

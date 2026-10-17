@@ -1,6 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/providers/firebase_providers.dart';
+import '../../household/providers/household_provider.dart';
 import '../models/goal_progress.dart';
 import '../models/goal_transaction.dart';
 import '../repositories/goals_repository.dart';
@@ -9,7 +10,7 @@ part 'goals_provider.g.dart';
 
 @riverpod
 GoalsRepository goalsRepository(Ref ref) {
-  final uid = ref.watch(authStateProvider).value?.uid;
+  final uid = ref.watch(effectiveOwnerUidProvider);
   if (uid == null) {
     throw StateError('goalsRepositoryProvider requer um usuário autenticado.');
   }

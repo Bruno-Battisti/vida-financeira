@@ -1,6 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/providers/firebase_providers.dart';
+import '../../household/providers/household_provider.dart';
 import '../../transactions/models/category.dart';
 import '../../transactions/models/transaction.dart';
 import '../../transactions/providers/categories_provider.dart';
@@ -12,7 +13,7 @@ part 'budgets_provider.g.dart';
 
 @riverpod
 BudgetsRepository budgetsRepository(Ref ref) {
-  final uid = ref.watch(authStateProvider).value?.uid;
+  final uid = ref.watch(effectiveOwnerUidProvider);
   if (uid == null) {
     throw StateError('budgetsRepositoryProvider requer um usuário autenticado.');
   }

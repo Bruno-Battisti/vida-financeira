@@ -49,7 +49,7 @@ final class GoalsRepositoryProvider
   }
 }
 
-String _$goalsRepositoryHash() => r'29a09dc1d9ba1b3237e839d44708a94172638220';
+String _$goalsRepositoryHash() => r'5e11913db44476e436af902e06d9b9787c98b617';
 
 @ProviderFor(goals)
 final goalsProvider = GoalsProvider._();

@@ -1,6 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/providers/firebase_providers.dart';
+import '../../household/providers/household_provider.dart';
 import '../../transactions/providers/transactions_provider.dart';
 import '../models/recurring_rule.dart';
 import '../repositories/recurring_rules_repository.dart';
@@ -10,7 +11,7 @@ part 'recurring_rules_provider.g.dart';
 
 @riverpod
 RecurringRulesRepository recurringRulesRepository(Ref ref) {
-  final uid = ref.watch(authStateProvider).value?.uid;
+  final uid = ref.watch(effectiveOwnerUidProvider);
   if (uid == null) {
     throw StateError('recurringRulesRepositoryProvider requer um usuário autenticado.');
   }
