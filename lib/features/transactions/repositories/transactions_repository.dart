@@ -27,6 +27,7 @@ class TransactionsRepository {
     String? note,
     DateTime? dueDate,
     bool isPaid = true,
+    String? recurringRuleId,
   }) {
     return _collection.add(_toMap(
       description: description,
@@ -37,6 +38,7 @@ class TransactionsRepository {
       note: note,
       dueDate: dueDate,
       isPaid: isPaid,
+      recurringRuleId: recurringRuleId,
     ));
   }
 
@@ -69,6 +71,7 @@ class TransactionsRepository {
     String? note,
     DateTime? dueDate,
     bool isPaid = true,
+    String? recurringRuleId,
   }) {
     return {
       'description': description,
@@ -79,6 +82,7 @@ class TransactionsRepository {
       'note': note,
       'dueDate': dueDate == null ? null : Timestamp.fromDate(dueDate),
       'isPaid': isPaid,
+      'recurringRuleId': recurringRuleId,
     };
   }
 
@@ -111,6 +115,7 @@ class TransactionsRepository {
       note: data['note'] as String?,
       dueDate: (data['dueDate'] as Timestamp?)?.toDate(),
       isPaid: data['isPaid'] as bool? ?? true,
+      recurringRuleId: data['recurringRuleId'] as String?,
     );
   }
 }

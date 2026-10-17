@@ -11,6 +11,8 @@ import '../features/dashboard/screens/dashboard_screen.dart';
 import '../features/goals/screens/goal_detail_screen.dart';
 import '../features/goals/screens/goal_form_screen.dart';
 import '../features/goals/screens/goals_screen.dart';
+import '../features/recurring/screens/recurring_rule_form_screen.dart';
+import '../features/recurring/screens/recurring_rules_screen.dart';
 import '../features/reports/screens/reports_screen.dart';
 import '../features/security/providers/app_lock_provider.dart';
 import '../features/security/screens/lock_screen.dart';
@@ -179,6 +181,18 @@ GoRouter createRouter(WidgetRef ref) {
             path: 'budgets',
             parentNavigatorKey: rootNavigatorKey,
             pageBuilder: (context, state) => _slideFadePage(state, const BudgetsScreen()),
+          ),
+          GoRoute(
+            path: 'recurring',
+            parentNavigatorKey: rootNavigatorKey,
+            pageBuilder: (context, state) => _slideFadePage(state, const RecurringRulesScreen()),
+            routes: [
+              GoRoute(
+                path: 'new',
+                parentNavigatorKey: rootNavigatorKey,
+                pageBuilder: (context, state) => _slideFadePage(state, const RecurringRuleFormScreen()),
+              ),
+            ],
           ),
           GoRoute(
             path: 'import-preview',

@@ -19,5 +19,8 @@ abstract class Transaction with _$Transaction {
     /// `false` representa uma conta a pagar/receber que ainda não foi
     /// liquidada — só entra nos totais e saldos quando marcada como paga.
     @Default(true) bool isPaid,
+    /// Preenchido quando a transação foi gerada automaticamente a partir de
+    /// uma regra de recorrência.
+    String? recurringRuleId,
   }) = _Transaction;
 }

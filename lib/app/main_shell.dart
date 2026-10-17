@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/widgets/responsive_center.dart';
+import '../features/recurring/providers/recurring_rules_provider.dart';
 
 class _NavItem {
   const _NavItem(
@@ -12,7 +14,7 @@ class _NavItem {
   final String label;
 }
 
-class MainShell extends StatelessWidget {
+class MainShell extends ConsumerWidget {
   const MainShell({super.key, required this.navigationShell});
 
   final StatefulNavigationShell navigationShell;
@@ -38,7 +40,10 @@ class MainShell extends StatelessWidget {
       );
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Dispara, uma única vez por sessão, a geração de transações de
+    // recorrências já vencidas (ver recurringGenerationProvider).
+    ref.watch(recurringGenerationProvider);
     final wide = isWideScreen(context);
 
     return Scaffold(

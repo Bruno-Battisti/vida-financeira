@@ -88,6 +88,12 @@ class SettingsScreen extends ConsumerWidget {
               onTap: () => context.push('/settings/budgets'),
             ),
             ListTile(
+              leading: const Icon(Icons.autorenew),
+              title: const Text('Transações recorrentes'),
+              subtitle: const Text('Salário, aluguel, assinaturas...'),
+              onTap: () => context.push('/settings/recurring'),
+            ),
+            ListTile(
               leading: const Icon(Icons.attach_money),
               title: const Text('Moeda'),
               subtitle: const Text('Real (R\$)'),

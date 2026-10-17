@@ -18,7 +18,9 @@ mixin _$Transaction {
  String get id; String get description; double get amount; TransactionType get type; int get categoryId; DateTime get date; String? get note;/// Data de vencimento de uma conta a pagar/receber ainda pendente.
  DateTime? get dueDate;/// `false` representa uma conta a pagar/receber que ainda não foi
 /// liquidada — só entra nos totais e saldos quando marcada como paga.
- bool get isPaid;
+ bool get isPaid;/// Preenchido quando a transação foi gerada automaticamente a partir de
+/// uma regra de recorrência.
+ String? get recurringRuleId;
 /// Create a copy of Transaction
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,20 +32,20 @@ $TransactionCopyWith<Transaction> get copyWith => _$TransactionCopyWithImpl<Tran
 @override
 bool operator ==(Object other) {
   final _this = this as Transaction;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Transaction&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.description, _this.description) || other.description == _this.description)&&(identical(other.amount, _this.amount) || other.amount == _this.amount)&&(identical(other.type, _this.type) || other.type == _this.type)&&(identical(other.categoryId, _this.categoryId) || other.categoryId == _this.categoryId)&&(identical(other.date, _this.date) || other.date == _this.date)&&(identical(other.note, _this.note) || other.note == _this.note)&&(identical(other.dueDate, _this.dueDate) || other.dueDate == _this.dueDate)&&(identical(other.isPaid, _this.isPaid) || other.isPaid == _this.isPaid));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Transaction&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.description, _this.description) || other.description == _this.description)&&(identical(other.amount, _this.amount) || other.amount == _this.amount)&&(identical(other.type, _this.type) || other.type == _this.type)&&(identical(other.categoryId, _this.categoryId) || other.categoryId == _this.categoryId)&&(identical(other.date, _this.date) || other.date == _this.date)&&(identical(other.note, _this.note) || other.note == _this.note)&&(identical(other.dueDate, _this.dueDate) || other.dueDate == _this.dueDate)&&(identical(other.isPaid, _this.isPaid) || other.isPaid == _this.isPaid)&&(identical(other.recurringRuleId, _this.recurringRuleId) || other.recurringRuleId == _this.recurringRuleId));
 }
 
 
 @override
 int get hashCode {
   final _this = this as Transaction;
-  return Object.hash(runtimeType,_this.id,_this.description,_this.amount,_this.type,_this.categoryId,_this.date,_this.note,_this.dueDate,_this.isPaid);
+  return Object.hash(runtimeType,_this.id,_this.description,_this.amount,_this.type,_this.categoryId,_this.date,_this.note,_this.dueDate,_this.isPaid,_this.recurringRuleId);
 }
 
 @override
 String toString() {
   final _this = this as Transaction;
-  return 'Transaction(id: ${_this.id}, description: ${_this.description}, amount: ${_this.amount}, type: ${_this.type}, categoryId: ${_this.categoryId}, date: ${_this.date}, note: ${_this.note}, dueDate: ${_this.dueDate}, isPaid: ${_this.isPaid})';
+  return 'Transaction(id: ${_this.id}, description: ${_this.description}, amount: ${_this.amount}, type: ${_this.type}, categoryId: ${_this.categoryId}, date: ${_this.date}, note: ${_this.note}, dueDate: ${_this.dueDate}, isPaid: ${_this.isPaid}, recurringRuleId: ${_this.recurringRuleId})';
 }
 
 
@@ -54,7 +56,7 @@ abstract mixin class $TransactionCopyWith<$Res>  {
   factory $TransactionCopyWith(Transaction value, $Res Function(Transaction) _then) = _$TransactionCopyWithImpl;
 @useResult
 $Res call({
- String id, String description, double amount, TransactionType type, int categoryId, DateTime date, String? note, DateTime? dueDate, bool isPaid
+ String id, String description, double amount, TransactionType type, int categoryId, DateTime date, String? note, DateTime? dueDate, bool isPaid, String? recurringRuleId
 });
 
 
@@ -71,7 +73,7 @@ class _$TransactionCopyWithImpl<$Res>
 
 /// Create a copy of Transaction
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? description = null,Object? amount = null,Object? type = null,Object? categoryId = null,Object? date = null,Object? note = freezed,Object? dueDate = freezed,Object? isPaid = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? description = null,Object? amount = null,Object? type = null,Object? categoryId = null,Object? date = null,Object? note = freezed,Object? dueDate = freezed,Object? isPaid = null,Object? recurringRuleId = freezed,}) {
   return _then(Transaction(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
@@ -82,7 +84,8 @@ as int,date: null == date ? _self.date : date // ignore: cast_nullable_to_non_nu
 as DateTime,note: freezed == note ? _self.note : note // ignore: cast_nullable_to_non_nullable
 as String?,dueDate: freezed == dueDate ? _self.dueDate : dueDate // ignore: cast_nullable_to_non_nullable
 as DateTime?,isPaid: null == isPaid ? _self.isPaid : isPaid // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,recurringRuleId: freezed == recurringRuleId ? _self.recurringRuleId : recurringRuleId // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
@@ -167,10 +170,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String description,  double amount,  TransactionType type,  int categoryId,  DateTime date,  String? note,  DateTime? dueDate,  bool isPaid)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String description,  double amount,  TransactionType type,  int categoryId,  DateTime date,  String? note,  DateTime? dueDate,  bool isPaid,  String? recurringRuleId)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Transaction() when $default != null:
-return $default(_that.id,_that.description,_that.amount,_that.type,_that.categoryId,_that.date,_that.note,_that.dueDate,_that.isPaid);case _:
+return $default(_that.id,_that.description,_that.amount,_that.type,_that.categoryId,_that.date,_that.note,_that.dueDate,_that.isPaid,_that.recurringRuleId);case _:
   return orElse();
 
 }
@@ -188,10 +191,10 @@ return $default(_that.id,_that.description,_that.amount,_that.type,_that.categor
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String description,  double amount,  TransactionType type,  int categoryId,  DateTime date,  String? note,  DateTime? dueDate,  bool isPaid)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String description,  double amount,  TransactionType type,  int categoryId,  DateTime date,  String? note,  DateTime? dueDate,  bool isPaid,  String? recurringRuleId)  $default,) {final _that = this;
 switch (_that) {
 case _Transaction():
-return $default(_that.id,_that.description,_that.amount,_that.type,_that.categoryId,_that.date,_that.note,_that.dueDate,_that.isPaid);case _:
+return $default(_that.id,_that.description,_that.amount,_that.type,_that.categoryId,_that.date,_that.note,_that.dueDate,_that.isPaid,_that.recurringRuleId);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -208,10 +211,10 @@ return $default(_that.id,_that.description,_that.amount,_that.type,_that.categor
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String description,  double amount,  TransactionType type,  int categoryId,  DateTime date,  String? note,  DateTime? dueDate,  bool isPaid)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String description,  double amount,  TransactionType type,  int categoryId,  DateTime date,  String? note,  DateTime? dueDate,  bool isPaid,  String? recurringRuleId)?  $default,) {final _that = this;
 switch (_that) {
 case _Transaction() when $default != null:
-return $default(_that.id,_that.description,_that.amount,_that.type,_that.categoryId,_that.date,_that.note,_that.dueDate,_that.isPaid);case _:
+return $default(_that.id,_that.description,_that.amount,_that.type,_that.categoryId,_that.date,_that.note,_that.dueDate,_that.isPaid,_that.recurringRuleId);case _:
   return null;
 
 }
@@ -223,7 +226,7 @@ return $default(_that.id,_that.description,_that.amount,_that.type,_that.categor
 
 
 class _Transaction implements Transaction {
-  const _Transaction({required this.id, required this.description, required this.amount, required this.type, required this.categoryId, required this.date, this.note, this.dueDate, this.isPaid = true});
+  const _Transaction({required this.id, required this.description, required this.amount, required this.type, required this.categoryId, required this.date, this.note, this.dueDate, this.isPaid = true, this.recurringRuleId});
   
 
 @override final  String id;
@@ -238,6 +241,9 @@ class _Transaction implements Transaction {
 /// `false` representa uma conta a pagar/receber que ainda não foi
 /// liquidada — só entra nos totais e saldos quando marcada como paga.
 @override@JsonKey() final  bool isPaid;
+/// Preenchido quando a transação foi gerada automaticamente a partir de
+/// uma regra de recorrência.
+@override final  String? recurringRuleId;
 
 /// Create a copy of Transaction
 /// with the given fields replaced by the non-null parameter values.
@@ -249,18 +255,18 @@ _$TransactionCopyWith<_Transaction> get copyWith => __$TransactionCopyWithImpl<_
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Transaction&&(identical(other.id, id) || other.id == id)&&(identical(other.description, description) || other.description == description)&&(identical(other.amount, amount) || other.amount == amount)&&(identical(other.type, type) || other.type == type)&&(identical(other.categoryId, categoryId) || other.categoryId == categoryId)&&(identical(other.date, date) || other.date == date)&&(identical(other.note, note) || other.note == note)&&(identical(other.dueDate, dueDate) || other.dueDate == dueDate)&&(identical(other.isPaid, isPaid) || other.isPaid == isPaid));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Transaction&&(identical(other.id, id) || other.id == id)&&(identical(other.description, description) || other.description == description)&&(identical(other.amount, amount) || other.amount == amount)&&(identical(other.type, type) || other.type == type)&&(identical(other.categoryId, categoryId) || other.categoryId == categoryId)&&(identical(other.date, date) || other.date == date)&&(identical(other.note, note) || other.note == note)&&(identical(other.dueDate, dueDate) || other.dueDate == dueDate)&&(identical(other.isPaid, isPaid) || other.isPaid == isPaid)&&(identical(other.recurringRuleId, recurringRuleId) || other.recurringRuleId == recurringRuleId));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,description,amount,type,categoryId,date,note,dueDate,isPaid);
+    return Object.hash(runtimeType,id,description,amount,type,categoryId,date,note,dueDate,isPaid,recurringRuleId);
 }
 
 @override
 String toString() {
-    return 'Transaction(id: $id, description: $description, amount: $amount, type: $type, categoryId: $categoryId, date: $date, note: $note, dueDate: $dueDate, isPaid: $isPaid)';
+    return 'Transaction(id: $id, description: $description, amount: $amount, type: $type, categoryId: $categoryId, date: $date, note: $note, dueDate: $dueDate, isPaid: $isPaid, recurringRuleId: $recurringRuleId)';
 }
 
 
@@ -271,7 +277,7 @@ abstract mixin class _$TransactionCopyWith<$Res> implements $TransactionCopyWith
   factory _$TransactionCopyWith(_Transaction value, $Res Function(_Transaction) _then) = __$TransactionCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String description, double amount, TransactionType type, int categoryId, DateTime date, String? note, DateTime? dueDate, bool isPaid
+ String id, String description, double amount, TransactionType type, int categoryId, DateTime date, String? note, DateTime? dueDate, bool isPaid, String? recurringRuleId
 });
 
 
@@ -288,7 +294,7 @@ class __$TransactionCopyWithImpl<$Res>
 
 /// Create a copy of Transaction
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? description = null,Object? amount = null,Object? type = null,Object? categoryId = null,Object? date = null,Object? note = freezed,Object? dueDate = freezed,Object? isPaid = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? description = null,Object? amount = null,Object? type = null,Object? categoryId = null,Object? date = null,Object? note = freezed,Object? dueDate = freezed,Object? isPaid = null,Object? recurringRuleId = freezed,}) {
   return _then(_Transaction(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
@@ -299,7 +305,8 @@ as int,date: null == date ? _self.date : date // ignore: cast_nullable_to_non_nu
 as DateTime,note: freezed == note ? _self.note : note // ignore: cast_nullable_to_non_nullable
 as String?,dueDate: freezed == dueDate ? _self.dueDate : dueDate // ignore: cast_nullable_to_non_nullable
 as DateTime?,isPaid: null == isPaid ? _self.isPaid : isPaid // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,recurringRuleId: freezed == recurringRuleId ? _self.recurringRuleId : recurringRuleId // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
