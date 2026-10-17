@@ -46,4 +46,4 @@ final class ReportsDataProvider
   }
 }
 
-String _$reportsDataHash() => r'1c8d10f769af714e6adab131431388eb6980027c';
+String _$reportsDataHash() => r'0c19ed632d406a034fffaa659e271f736443abe8';

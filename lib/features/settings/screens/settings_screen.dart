@@ -82,6 +82,12 @@ class SettingsScreen extends ConsumerWidget {
             const Divider(),
             const _SectionLabel('Preferências'),
             ListTile(
+              leading: const Icon(Icons.pie_chart_outline),
+              title: const Text('Orçamentos'),
+              subtitle: const Text('Defina limites mensais por categoria'),
+              onTap: () => context.push('/settings/budgets'),
+            ),
+            ListTile(
               leading: const Icon(Icons.attach_money),
               title: const Text('Moeda'),
               subtitle: const Text('Real (R\$)'),

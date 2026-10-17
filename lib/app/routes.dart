@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../core/providers/firebase_providers.dart';
 import '../features/auth/screens/auth_screen.dart';
+import '../features/budgets/screens/budgets_screen.dart';
 import '../features/dashboard/screens/dashboard_screen.dart';
 import '../features/goals/screens/goal_detail_screen.dart';
 import '../features/goals/screens/goal_form_screen.dart';
@@ -174,6 +175,11 @@ GoRouter createRouter(WidgetRef ref) {
         parentNavigatorKey: rootNavigatorKey,
         pageBuilder: (context, state) => _slideFadePage(state, const SettingsScreen()),
         routes: [
+          GoRoute(
+            path: 'budgets',
+            parentNavigatorKey: rootNavigatorKey,
+            pageBuilder: (context, state) => _slideFadePage(state, const BudgetsScreen()),
+          ),
           GoRoute(
             path: 'import-preview',
             parentNavigatorKey: rootNavigatorKey,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/utils/formatters.dart';
+import '../../budgets/providers/budgets_provider.dart';
 import '../../transactions/models/transaction.dart';
 import '../../transactions/providers/categories_provider.dart';
 import '../providers/dashboard_providers.dart';
@@ -35,6 +36,7 @@ class DashboardScreen extends ConsumerWidget {
         const SizedBox(height: 16),
         const ExchangeRateCard(),
         const SizedBox(height: 16),
+        const _BudgetAlerts(),
         Row(
           children: [
             Expanded(
@@ -107,6 +109,60 @@ class DashboardScreen extends ConsumerWidget {
             ),
           ),
       ],
+    );
+  }
+}
+
+class _BudgetAlerts extends ConsumerWidget {
+  const _BudgetAlerts();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final progressAsync = ref.watch(budgetProgressProvider);
+    final progress = switch (progressAsync) {
+      AsyncData(:final value) => value,
+      _ => const <BudgetProgress>[],
+    };
+    final overBudget =
+        progress.where((p) => p.budget.monthlyLimit > 0 && p.spent > p.budget.monthlyLimit).toList();
+
+    if (overBudget.isEmpty) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Card(
+        color: Theme.of(context).colorScheme.errorContainer,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.warning_amber_rounded, color: Theme.of(context).colorScheme.onErrorContainer),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Orçamento estourado',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onErrorContainer,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              for (final p in overBudget)
+                Padding(
+                  padding: const EdgeInsets.only(top: 2),
+                  child: Text(
+                    '${p.category.name}: ${formatCurrency(p.spent)} de ${formatCurrency(p.budget.monthlyLimit)}',
+                    style: TextStyle(color: Theme.of(context).colorScheme.onErrorContainer),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
